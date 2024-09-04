@@ -5,6 +5,7 @@
  */
 package org.guanzon.auto.main.service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.constant.EditMode;
@@ -32,8 +33,8 @@ public class JobOrder implements GTransaction{
     
     public JobOrder(GRider foAppDrver, boolean fbWtParent, String fsBranchCd){
         poController = new JobOrder_Master(foAppDrver,fbWtParent,fsBranchCd);
-//        poJOLabor = new JobOrder_Labor(foAppDrver);
-//        poJOParts = new JobOrder_Parts(foAppDrver);
+        poJOLabor = new JobOrder_Labor(foAppDrver);
+        poJOParts = new JobOrder_Parts(foAppDrver);
         
         poGRider = foAppDrver;
         pbWtParent = fbWtParent;
@@ -98,17 +99,17 @@ public class JobOrder implements GTransaction{
             pnEditMode = EditMode.UNKNOWN;
         }
         
-//        poJSON = poJOLabor.openDetail(fsValue);
-//        if(!"success".equals((String) checkData(poJSON).get("result"))){
-//            pnEditMode = EditMode.UNKNOWN;
-//            return poJSON;
-//        }
-//        
-//        poJSON = poJOParts.openDetail(fsValue);
-//        if(!"success".equals((String) checkData(poJSON).get("result"))){
-//            pnEditMode = EditMode.UNKNOWN;
-//            return poJSON;
-//        }
+        poJSON = poJOLabor.openDetail(fsValue);
+        if(!"success".equals((String) checkData(poJSON).get("result"))){
+            pnEditMode = EditMode.UNKNOWN;
+            return poJSON;
+        }
+        
+        poJSON = poJOParts.openDetail(fsValue);
+        if(!"success".equals((String) checkData(poJSON).get("result"))){
+            pnEditMode = EditMode.UNKNOWN;
+            return poJSON;
+        }
 
         return poJSON;
     }
@@ -146,19 +147,19 @@ public class JobOrder implements GTransaction{
             return checkData(poJSON);
         }
         
-//        poJOLabor.setTargetBranchCd(poController.getMasterModel().getBranchCD());
-//        poJSON =  poJOLabor.saveDetail((String) poController.getMasterModel().getTransNo());
-//        if("error".equalsIgnoreCase((String)checkData(poJSON).get("result"))){
-//            if (!pbWtParent) poGRider.rollbackTrans();
-//            return checkData(poJSON);
-//        }
-//        
-//        poJOParts.setTargetBranchCd(poController.getMasterModel().getBranchCD());
-//        poJSON =  poJOParts.saveDetail((String) poController.getMasterModel().getTransNo());
-//        if("error".equalsIgnoreCase((String)checkData(poJSON).get("result"))){
-//            if (!pbWtParent) poGRider.rollbackTrans();
-//            return checkData(poJSON);
-//        }
+        poJOLabor.setTargetBranchCd(poController.getMasterModel().getBranchCD());
+        poJSON =  poJOLabor.saveDetail((String) poController.getMasterModel().getTransNo());
+        if("error".equalsIgnoreCase((String)checkData(poJSON).get("result"))){
+            if (!pbWtParent) poGRider.rollbackTrans();
+            return checkData(poJSON);
+        }
+        
+        poJOParts.setTargetBranchCd(poController.getMasterModel().getBranchCD());
+        poJSON =  poJOParts.saveDetail((String) poController.getMasterModel().getTransNo());
+        if("error".equalsIgnoreCase((String)checkData(poJSON).get("result"))){
+            if (!pbWtParent) poGRider.rollbackTrans();
+            return checkData(poJSON);
+        }
         
         if (!pbWtParent) poGRider.commitTrans();
         
@@ -241,14 +242,31 @@ public class JobOrder implements GTransaction{
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-//    public JobOrder_Labor getJOLaborModel(){return poJOLabor;} 
-//    public ArrayList getJOLaborList(){return poJOLabor.getDetailList();}
-//    public Object addJOLabor(){ return poJOLabor.addDetail(poController.getMasterModel().getTransNo());}
-//    public Object removeJOLabor(int fnRow){ return poJOLabor.removeDetail(fnRow);}
-//    
-//    public JobOrder_Parts getJOPartsModel(){return poJOParts;} 
-//    public ArrayList getJOPartsList(){return poJOParts.getDetailList();}
-//    public Object addJOParts(){ return poJOParts.addDetail(poController.getMasterModel().getTransNo());}
-//    public Object removeJOParts(int fnRow){ return poJOParts.removeDetail(fnRow);}
+    public JobOrder_Labor getJOLaborModel(){return poJOLabor;} 
+    public ArrayList getJOLaborList(){return poJOLabor.getDetailList();}
+    public Object addJOLabor(){ return poJOLabor.addDetail(poController.getMasterModel().getTransNo());}
+    public Object removeJOLabor(int fnRow){ return poJOLabor.removeDetail(fnRow);}
+    
+    public JobOrder_Parts getJOPartsModel(){return poJOParts;} 
+    public ArrayList getJOPartsList(){return poJOParts.getDetailList();}
+    public Object addJOParts(){ return poJOParts.addDetail(poController.getMasterModel().getTransNo());}
+    public Object removeJOParts(int fnRow){ return poJOParts.removeDetail(fnRow);}
+    
+    public JSONObject computeAmount(){
+        JSONObject loJSON = new JSONObject();
+        
+        return loJSON;
+    }
+    
+    private JSONObject validateEntry(){
+        JSONObject loJSON = new JSONObject();
+        
+        //Validate JO labor required
+        if(poJOLabor.getDetailList().size() - 1 < 0){
+            loJSON.put("result","error");
+            loJSON.put("message", "");
+        }
+        return loJSON;
+    }
     
 }

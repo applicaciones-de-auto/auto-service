@@ -8,14 +8,15 @@ package org.guanzon.auto.controller.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import org.guanzon.appdriver.agent.ShowDialogFX;
 import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.iface.GTranDet;
-import org.guanzon.auto.model.sales.Model_JobOrder_Labor;
-import org.guanzon.auto.model.sales.Model_JobOrder_Labor;
 import org.guanzon.auto.model.service.Model_JobOrder_Labor;
+import org.guanzon.auto.validator.service.ValidatorFactory;
+import org.guanzon.auto.validator.service.ValidatorInterface;
 import org.json.simple.JSONObject;
 
 /**
@@ -66,21 +67,17 @@ public class JobOrder_Labor implements GTranDet {
             
             paDetail.get(0).setTransNo(fsTransNo);
             paDetail.get(0).setEntryNo(0);
-            paDetail.get(0).setAddDate(poGRider.getServerDate());
-            paDetail.get(0).setAddBy(poGRider.getUserID());
             poJSON.put("result", "success");
-            poJSON.put("message", "VSP Labor add record.");
+            poJSON.put("message", "JO Labor add record.");
         } else {
             paDetail.add(new Model_JobOrder_Labor(poGRider));
             paDetail.get(paDetail.size()-1).newRecord();
 
             paDetail.get(paDetail.size()-1).setTransNo(fsTransNo);
             paDetail.get(paDetail.size()-1).setEntryNo(0);
-            paDetail.get(paDetail.size()-1).setAddDate(poGRider.getServerDate());
-            paDetail.get(paDetail.size()-1).setAddBy(poGRider.getUserID());
             
             poJSON.put("result", "success");
-            poJSON.put("message", "VSP Labor add record.");
+            poJSON.put("message", "JO Labor add record.");
         }
         return poJSON;
     }
@@ -93,7 +90,7 @@ public class JobOrder_Labor implements GTranDet {
                         + "   sTransNox "   
                         + " , nEntryNox "   
                         + " , sLaborCde "                                               
-                        + "  FROM vsp_labor " ;
+                        + "  FROM diagnostic_labor " ;
         lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsValue))
                                                 + "  ORDER BY nEntryNox ASC " ;
         System.out.println(lsSQL);
@@ -155,20 +152,6 @@ public class JobOrder_Labor implements GTranDet {
             return obj;
         }
         
-        if(psTargetBranchCd == null){
-            obj.put("result", "error");
-            obj.put("continue", false);
-            obj.put("message", "Target Branch code for vsp labor cannot be empty.");
-            return obj;
-        } else {
-            if(psTargetBranchCd.isEmpty()){
-                obj.put("result", "error");
-                obj.put("continue", false);
-                obj.put("message", "Target Branch code for vsp labor cannot be empty.");
-                return obj;
-            }
-        }
-        
         for (lnCtr = 0; lnCtr <= lnSize; lnCtr++){
             //if(lnCtr>0){
                 if(paDetail.get(lnCtr).getLaborCde().isEmpty()){
@@ -185,7 +168,7 @@ public class JobOrder_Labor implements GTranDet {
             paDetail.get(lnCtr).setEntryNo(lnCtr+1);
             paDetail.get(lnCtr).setTargetBranchCd(psTargetBranchCd);
             
-            ValidatorInterface validator = ValidatorFactory.make(ValidatorFactory.TYPE.VehicleSalesProposal_Labor, paDetail.get(lnCtr));
+            ValidatorInterface validator = ValidatorFactory.make(ValidatorFactory.TYPE.JobOrder_Labor, paDetail.get(lnCtr));
             validator.setGRider(poGRider);
             if (!validator.isEntryOkay()){
                 obj.put("result", "error");
@@ -199,22 +182,6 @@ public class JobOrder_Labor implements GTranDet {
     }
     public void setTargetBranchCd(String fsBranchCd){
         psTargetBranchCd = fsBranchCd;
-    }
-    
-    public ArrayList<Model_JobOrder_Labor> getDetailList(){
-        if(paDetail == null){
-           paDetail = new ArrayList<>();
-        }
-        return paDetail;
-    }
-    public void setDetailList(ArrayList<Model_JobOrder_Labor> foObj){this.paDetail = foObj;}
-    
-   
-    public Object getDetail(int fnRow, int fnIndex){return paDetail.get(fnRow).getValue(fnIndex);}
-    public Object getDetail(int fnRow, String fsIndex){return paDetail.get(fnRow).getValue(fsIndex);}
-    
-    public Model_JobOrder_Labor getDetailModel(int fnRow) {
-        return paDetail.get(fnRow);
     }
     
     public Object removeDetail(int fnRow){
@@ -251,12 +218,22 @@ public class JobOrder_Labor implements GTranDet {
         return poJSON;
     }
     
+    public ArrayList<Model_JobOrder_Labor> getDetailList(){
+        if(paDetail == null){
+           paDetail = new ArrayList<>();
+        }
+        return paDetail;
+    }
+    public void setDetailList(ArrayList<Model_JobOrder_Labor> foObj){this.paDetail = foObj;}
+    
+    public Object getDetail(int fnRow, int fnIndex){return paDetail.get(fnRow).getValue(fnIndex);}
+    public Object getDetail(int fnRow, String fsIndex){return paDetail.get(fnRow).getValue(fsIndex);}
+    
     @Override
     public JSONObject setDetail(int fnRow, int fnIndex, Object foValue){ 
         return paDetail.get(fnRow).setValue(fnIndex, foValue);
     }
     
-
     @Override
     public JSONObject setDetail(int fnRow, String fsIndex, Object foValue){ 
         return paDetail.get(fnRow).setValue(fsIndex, foValue);
@@ -357,4 +334,40 @@ public class JobOrder_Labor implements GTranDet {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
+    
+    public JSONObject searchLabor(String fsValue) {
+        poJSON = new JSONObject();
+        String lsHeader = "ID»Description";
+        String lsColName = "sLaborCde»sLaborDsc"; 
+        String lsCriteria = "sLaborCde»sLaborDsc";
+        
+        String lsSQL =   " SELECT "                                             
+                + "   sLaborCde "                                      
+                + " , sLaborDsc "                                      
+                + " , cRecdStat "                                      
+                + " FROM labor " ; 
+        
+        lsSQL = MiscUtil.addCondition(lsSQL,  " cRecdStat = '1' "
+                                            + " AND sLaborDsc LIKE " + SQLUtil.toSQL(fsValue + "%"));
+        
+        
+        System.out.println("SEARCH LABOR: " + lsSQL);
+        poJSON = ShowDialogFX.Search(poGRider,
+                lsSQL,
+                fsValue,
+                    lsHeader,
+                    lsColName,
+                    lsCriteria,
+                1);
+
+        if (poJSON != null) {
+        } else {
+            poJSON = new JSONObject();
+            poJSON.put("result", "error");
+            poJSON.put("message", "No record loaded.");
+            return poJSON;
+        }
+        
+        return poJSON;
+    }
 }

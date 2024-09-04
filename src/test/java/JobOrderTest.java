@@ -131,13 +131,13 @@ public class JobOrderTest {
                 System.exit(1);
             } 
             
-            json = model.getMasterModel().getMasterModel().setSourceNo("M001VSP24001");
+            json = model.getMasterModel().getMasterModel().setSourceNo("M001JO24001");
             if ("error".equals((String) json.get("result"))){
                 System.err.println((String) json.get("message"));
                 System.exit(1);
             } 
             
-            json = model.getMasterModel().getMasterModel().setSourceCD("VSP");
+            json = model.getMasterModel().getMasterModel().setSourceCD("JO");
             if ("error".equals((String) json.get("result"))){
                 System.err.println((String) json.get("message"));
                 System.exit(1);
@@ -203,6 +203,25 @@ public class JobOrderTest {
                 System.exit(1);
             }
             
+            model.addJOLabor();
+            System.out.println("JO Labor size = " + model.getJOLaborList().size());
+            for(int lnctr = 0; lnctr < model.getJOLaborList().size(); lnctr++){
+                model.getJOLaborModel().getDetailModel(lnctr).setLaborCde("M00124000001");
+                model.getJOLaborModel().getDetailModel(lnctr).setUnitPrce(new BigDecimal(1500.00));
+                model.getJOLaborModel().getDetailModel(lnctr).setLaborDsc("TINT");
+                model.getJOLaborModel().getDetailModel(lnctr).setLbrPckCd("101");
+                model.getJOLaborModel().getDetailModel(lnctr).setPayChrge("1");
+            }
+            
+            model.addJOParts();
+            System.out.println("JO Parts size = " + model.getJOPartsList().size());
+            for(int lnctr = 0; lnctr < model.getJOPartsList().size(); lnctr++){
+                model.getJOPartsModel().getDetailModel(lnctr).setStockID("");
+                model.getJOPartsModel().getDetailModel(lnctr).setDescript("SEAT COVER");
+                model.getJOPartsModel().getDetailModel(lnctr).setPayChrge("1");
+                model.getJOPartsModel().getDetailModel(lnctr).setQtyEstmt(1);
+            }
+            
         } else {
             System.err.println("result = " + (String) json.get("result"));
             fail((String) json.get("message"));
@@ -243,28 +262,28 @@ public class JobOrderTest {
 //            result = false;
 //        } else {
 //            System.out.println("--------------------------------------------------------------------");
-//            System.out.println("VSP MASTER");
+//            System.out.println("JO MASTER");
 //            System.out.println("--------------------------------------------------------------------");
 //            System.out.println("sBranchNm  :  " + model.getMaster("sBranchNm"));
 //            
 //            System.out.println("--------------------------------------------------------------------");
-//            System.out.println("VSP FINANCE");
+//            System.out.println("JO FINANCE");
 //            System.out.println("--------------------------------------------------------------------");
-//            for(int lnCtr = 0;lnCtr <= model.getVSPFinanceList().;lnCtr++){
+//            for(int lnCtr = 0;lnCtr <= model.getJOFinanceList().;lnCtr++){
 //                System.out.println("sTransNox  :  " +); 
 //            }
 //            
 //            System.out.println("--------------------------------------------------------------------");
-//            System.out.println("VSP LABOR");
+//            System.out.println("JO LABOR");
 //            System.out.println("--------------------------------------------------------------------");
-//            for(int lnCtr = 0;lnCtr <= model.getVSPLaborList().size()-1; lnCtr++){
+//            for(int lnCtr = 0;lnCtr <= model.getJOLaborList().size()-1; lnCtr++){
 //                System.out.println("sTransNox  :  " +); 
 //            }
 //            
 //            System.out.println("--------------------------------------------------------------------");
-//            System.out.println("VSP PARTS");
+//            System.out.println("JO PARTS");
 //            System.out.println("--------------------------------------------------------------------");
-//            for(int lnCtr = 0;lnCtr <= model.getVSPPartsList().size()-1; lnCtr++){
+//            for(int lnCtr = 0;lnCtr <= model.getJOPartsList().size()-1; lnCtr++){
 //                System.out.println("sTransNox  :  " +); 
 //            }
 //            
