@@ -336,4 +336,33 @@ public class JobOrder_Master implements GTransaction{
         return loJSON;
     }
     
+    
+    public JSONObject searchEmployee(String fsValue){
+        JSONObject loJSON = new JSONObject(); 
+        String lsHeader = "VSP Date»VSP No»Customer»CS No»Plate No";
+        String lsColName = "dTransact»sVSPNOxxx»sCompnyNm»sCSNoxxxx»sPlateNox";
+        String lsCriteria = "a.dTransact»a.sVSPNOxxx»b.sCompnyNm»p.sCSNoxxxx»q.sPlateNox";
+        String lsSQL = poVSP.makeSelectSQL();; 
+        
+        lsSQL = MiscUtil.addCondition(lsSQL,  " a.cTranStat = '1' "
+                                                + " AND b.sCompnyNm LIKE " + SQLUtil.toSQL(fsValue + "%")
+                                                + " GROUP BY a.sTransNox ");
+        System.out.println("SEARCH VSP: " + lsSQL);
+        loJSON = ShowDialogFX.Search(poGRider,
+                lsSQL,
+                fsValue,
+                    lsHeader,
+                    lsColName,
+                    lsCriteria,
+                1);
+
+        if (loJSON != null) {
+        } else {
+            loJSON = new JSONObject();
+            loJSON.put("result", "error");
+            loJSON.put("message", "No record loaded.");
+            return loJSON;
+        }
+        return loJSON;
+    }
 }

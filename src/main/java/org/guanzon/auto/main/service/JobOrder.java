@@ -129,15 +129,15 @@ public class JobOrder implements GTransaction{
     public JSONObject saveTransaction() {
         poJSON = new JSONObject();  
         
-//        poJSON = computeAmount();
-//        if("error".equalsIgnoreCase((String)poJSON.get("result"))){
-//            return poJSON;
-//        }
-//        
-//        poJSON = validateEntry();
-//        if("error".equalsIgnoreCase((String)poJSON.get("result"))){
-//            return poJSON;
-//        }
+        poJSON = computeAmount();
+        if("error".equalsIgnoreCase((String)poJSON.get("result"))){
+            return poJSON;
+        }
+        
+        poJSON = validateEntry();
+        if("error".equalsIgnoreCase((String)poJSON.get("result"))){
+            return poJSON;
+        }
         
         if (!pbWtParent) poGRider.beginTrans();
         
@@ -254,6 +254,22 @@ public class JobOrder implements GTransaction{
     
     public JSONObject computeAmount(){
         JSONObject loJSON = new JSONObject();
+        int lnCtr = 0;
+        BigDecimal ldblLaborAmt = new BigDecimal("0.00");
+        BigDecimal ldblPartsAmt = new BigDecimal("0.00");
+        /*Compute Labor Total*/
+        for (lnCtr = 0; lnCtr <= getJOLaborList().size()-1; lnCtr++){
+            ldblLaborAmt = ldblLaborAmt.add(poJOLabor.getDetailModel(lnCtr).getUnitPrce()).setScale(2, BigDecimal.ROUND_HALF_UP);
+        }
+        
+        /*Compute Parts Total*/
+        for (lnCtr = 0; lnCtr <= getJOPartsList().size()-1; lnCtr++){
+            ldblPartsAmt = ldblPartsAmt.add(new BigDecimal(String.valueOf(poJOParts.getDetailModel(lnCtr).getQtyEstmt())).multiply(poJOParts.getDetailModel(lnCtr).getUnitPrce()));
+        }
+        
+        poController.getMasterModel().setLaborAmt(ldblLaborAmt);
+        poController.getMasterModel().setPartsAmt(ldblPartsAmt);
+        poController.getMasterModel().setTranAmt(ldblLaborAmt.add(ldblPartsAmt));
         
         return loJSON;
     }
@@ -264,7 +280,7 @@ public class JobOrder implements GTransaction{
         //Validate JO labor required
         if(poJOLabor.getDetailList().size() - 1 < 0){
             loJSON.put("result","error");
-            loJSON.put("message", "");
+            loJSON.put("message", "Job Order labor cannot be empty.");
         }
         return loJSON;
     }
