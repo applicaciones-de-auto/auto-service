@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.iface.GTransaction;
+import org.guanzon.auto.controller.sales.VehicleSalesProposal_Labor;
+import org.guanzon.auto.controller.sales.VehicleSalesProposal_Parts;
 import org.guanzon.auto.controller.service.JobOrder_Labor;
 import org.guanzon.auto.controller.service.JobOrder_Master;
 import org.guanzon.auto.controller.service.JobOrder_Parts;
@@ -31,10 +33,15 @@ public class JobOrder implements GTransaction{
     JobOrder_Labor poJOLabor;
     JobOrder_Parts poJOParts;
     
+    VehicleSalesProposal_Labor poVSPLabor;
+    VehicleSalesProposal_Parts poVSPParts;
+    
     public JobOrder(GRider foAppDrver, boolean fbWtParent, String fsBranchCd){
         poController = new JobOrder_Master(foAppDrver,fbWtParent,fsBranchCd);
         poJOLabor = new JobOrder_Labor(foAppDrver);
         poJOParts = new JobOrder_Parts(foAppDrver);
+        poVSPLabor = new VehicleSalesProposal_Labor(foAppDrver);
+        poVSPParts = new VehicleSalesProposal_Parts(foAppDrver);
         
         poGRider = foAppDrver;
         pbWtParent = fbWtParent;
@@ -281,6 +288,78 @@ public class JobOrder implements GTransaction{
         if(poJOLabor.getDetailList().size() - 1 < 0){
             loJSON.put("result","error");
             loJSON.put("message", "Job Order labor cannot be empty.");
+        }
+        return loJSON;
+    }
+    
+    public JSONObject searchVSP(String fsValue){
+        JSONObject loJSON = new JSONObject();
+        loJSON = poController.searchVSP(fsValue);
+        if(!"error".equals((String) loJSON.get("result"))){
+            loJSON = poVSPLabor.openDetail((String) loJSON.get("sTransNox"));
+            if( "error".equals((String) loJSON.get("result"))){
+                return loJSON;
+            }
+            
+            loJSON = poVSPParts.openDetail((String) loJSON.get("sTransNox"));
+            if( "error".equals((String) loJSON.get("result"))){
+                return loJSON;
+            }
+            
+            poController.getMasterModel().setSourceNo((String) poJSON.get("sTransNox"));
+            poController.getMasterModel().setVSPNo((String) poJSON.get("sVSPNOxxx"));
+            poController.getMasterModel().setSerialID((String) poJSON.get("sSerialID"));
+            poController.getMasterModel().setClientID((String) poJSON.get("sClientID"));
+            poController.getMasterModel().setOwnrNm((String) poJSON.get("sBuyCltNm"));
+            poController.getMasterModel().setClientTp((String) poJSON.get("cClientTp"));
+            poController.getMasterModel().setAddress((String) poJSON.get("sAddressx"));
+            poController.getMasterModel().setCSNo((String) poJSON.get("sCSNoxxxx"));
+            poController.getMasterModel().setPlateNo((String) poJSON.get("sPlateNox"));
+            poController.getMasterModel().setFrameNo((String) poJSON.get("sFrameNox"));
+            poController.getMasterModel().setEngineNo((String) poJSON.get("sEngineNo"));
+            poController.getMasterModel().setVhclDesc((String) poJSON.get("sVhclFDsc"));
+            poController.getMasterModel().setBranchCD((String) poJSON.get("sBranchCD"));
+            poController.getMasterModel().setBranchNm((String) poJSON.get("sBranchNm"));
+            poController.getMasterModel().setEmployID((String) poJSON.get("sEmployID"));
+            poController.getMasterModel().setEmployNm((String) poJSON.get("sSENamexx"));
+            
+        } else {
+            poController.getMasterModel().setSourceNo("");        
+            poController.getMasterModel().setVSPNo("");           
+            poController.getMasterModel().setSerialID("");        
+            poController.getMasterModel().setClientID("");        
+            poController.getMasterModel().setOwnrNm("");          
+            poController.getMasterModel().setClientTp("");        
+            poController.getMasterModel().setAddress("");         
+            poController.getMasterModel().setCSNo("");            
+            poController.getMasterModel().setPlateNo("");         
+            poController.getMasterModel().setFrameNo("");         
+            poController.getMasterModel().setEngineNo("");        
+            poController.getMasterModel().setVhclDesc("");        
+            poController.getMasterModel().setBranchCD("");        
+            poController.getMasterModel().setBranchNm("");        
+            poController.getMasterModel().setEmployID("");        
+            poController.getMasterModel().setEmployNm("");
+        }
+        return loJSON;
+    }
+    
+    public VehicleSalesProposal_Labor getVSPLaborModel(){return poVSPLabor;} 
+    public ArrayList getVSPLaborList(){return poVSPLabor.getDetailList();}
+    
+    public VehicleSalesProposal_Parts getVSPPartsModel(){return poVSPParts;} 
+    public ArrayList getVSPPartsList(){return poVSPParts.getDetailList();}
+    
+    
+    public JSONObject searchServiceAdvisor(String fsValue){
+        JSONObject loJSON = new JSONObject();
+        loJSON = poController.searchEmployee(fsValue);
+        if(!"error".equals((String) poJSON.get("result"))){
+            poController.getMasterModel().setEmployID((String) poJSON.get("sClientID"));
+            poController.getMasterModel().setEmployNm((String) poJSON.get("sCompnyNm"));
+        } else {
+            poController.getMasterModel().setEmployID("");
+            poController.getMasterModel().setEmployNm("");
         }
         return loJSON;
     }

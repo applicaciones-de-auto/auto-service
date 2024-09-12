@@ -40,7 +40,7 @@ public class JobOrder_Master implements GTransaction{
     
     Model_JobOrder_Master poModel;
     
-    Model_VehicleSalesProposal_Master poVSP;
+    Model_VehicleSalesProposal_Master poVSPModel;
     
     public JobOrder_Master(GRider foGRider, boolean fbWthParent, String fsBranchCd) {
         poGRider = foGRider;
@@ -48,7 +48,7 @@ public class JobOrder_Master implements GTransaction{
         psBranchCd = fsBranchCd.isEmpty() ? foGRider.getBranchCode() : fsBranchCd;
 
         poModel = new Model_JobOrder_Master(foGRider);
-        poVSP = new Model_VehicleSalesProposal_Master(foGRider);
+        poVSPModel= new Model_VehicleSalesProposal_Master(foGRider);
         pnEditMode = EditMode.UNKNOWN;
     }
     
@@ -312,10 +312,12 @@ public class JobOrder_Master implements GTransaction{
         String lsHeader = "VSP Date»VSP No»Customer»CS No»Plate No";
         String lsColName = "dTransact»sVSPNOxxx»sCompnyNm»sCSNoxxxx»sPlateNox";
         String lsCriteria = "a.dTransact»a.sVSPNOxxx»b.sCompnyNm»p.sCSNoxxxx»q.sPlateNox";
-        String lsSQL = poVSP.makeSelectSQL();; 
+        String lsSQL = poVSPModel.getSQL();; 
         
-        lsSQL = MiscUtil.addCondition(lsSQL,  " a.cTranStat = '1' "
+        lsSQL = MiscUtil.addCondition(lsSQL,  " a.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                                                 + " AND b.sCompnyNm LIKE " + SQLUtil.toSQL(fsValue + "%")
+                                                + " AND (a.sTransNox IN (SELECT vsp_labor.sTransNox FROM vsp_labor WHERE vsp_labor.sTransNox = a.sTransNox ) " 
+                                                + " OR a.sTransNox IN (SELECT vsp_parts.sTransNox FROM vsp_parts WHERE vsp_parts.sTransNox = a.sTransNox )) " 
                                                 + " GROUP BY a.sTransNox ");
         System.out.println("SEARCH VSP: " + lsSQL);
         loJSON = ShowDialogFX.Search(poGRider,
@@ -336,33 +338,48 @@ public class JobOrder_Master implements GTransaction{
         return loJSON;
     }
     
-    
+    /**
+     * Search Service Advisor
+     * @param fsValue Employee name
+     * @return 
+     */
     public JSONObject searchEmployee(String fsValue){
-        JSONObject loJSON = new JSONObject(); 
-        String lsHeader = "VSP Date»VSP No»Customer»CS No»Plate No";
-        String lsColName = "dTransact»sVSPNOxxx»sCompnyNm»sCSNoxxxx»sPlateNox";
-        String lsCriteria = "a.dTransact»a.sVSPNOxxx»b.sCompnyNm»p.sCSNoxxxx»q.sPlateNox";
-        String lsSQL = poVSP.makeSelectSQL();; 
+        poJSON = new JSONObject();
+        String lsSQL =   "  SELECT "                                                                                                                                                                                                 
+                        + "   a.sEmployID "                                                                                                                                                                                           
+                        + " , b.sClientID "                                                                                                                                                                                            
+                        + " , b.sCompnyNm "                                                                                                                                                                                           
+                        + " , c.sDeptIDxx "                                                                                                                                                                                           
+                        + " , c.sDeptName "                                                                                                                                                                                           
+                        + " , e.sBranchCd "                                                                                                                                                                                           
+                        + " , e.sBranchNm "                                                                                                                                                                                           
+                        + " FROM GGC_ISysDBF.Employee_Master001 a  "                                                                                                                                                                  
+                        + " LEFT JOIN GGC_ISysDBF.Client_Master b ON b.sClientID = a.sEmployID "                                                                                                                                      
+                        + " LEFT JOIN GGC_ISysDBF.Department c ON c.sDeptIDxx = a.sDeptIDxx    "                                                                                                                                      
+                        + " LEFT JOIN GGC_ISysDBF.Branch_Others d ON d.sBranchCD = a.sBranchCd "                                                                                                                                      
+                        + " LEFT JOIN GGC_ISysDBF.Branch e ON e.sBranchCD = a.sBranchCd        "                                                                                                                                      
+                        + " WHERE b.cRecdStat = '1' AND a.cRecdStat = '1' AND ISNULL(a.dFiredxxx) "                                                                                                                                   
+                        + " AND d.sBranchCD = " + SQLUtil.toSQL(poGRider.getBranchCode());                                                                                                                                                                                      
         
-        lsSQL = MiscUtil.addCondition(lsSQL,  " a.cTranStat = '1' "
-                                                + " AND b.sCompnyNm LIKE " + SQLUtil.toSQL(fsValue + "%")
-                                                + " GROUP BY a.sTransNox ");
-        System.out.println("SEARCH VSP: " + lsSQL);
-        loJSON = ShowDialogFX.Search(poGRider,
+         lsSQL = MiscUtil.addCondition(lsSQL, "b.sCompnyNm LIKE " + SQLUtil.toSQL(fsValue + "%")); 
+        
+        System.out.println("SEARCH EMPLOYEE: " + lsSQL);
+        poJSON = ShowDialogFX.Search(poGRider,
                 lsSQL,
                 fsValue,
-                    lsHeader,
-                    lsColName,
-                    lsCriteria,
-                1);
-
-        if (loJSON != null) {
+                "Employee ID»Name»Department»Branch",
+                "sEmployID»sCompnyNm»sDeptName»sBranchNm",
+                "a.sEmployID»b.sCompnyNm»c.sDeptName»e.sBranchNm",
+                0);
+        
+        if (poJSON != null) {
         } else {
-            loJSON = new JSONObject();
-            loJSON.put("result", "error");
-            loJSON.put("message", "No record loaded.");
-            return loJSON;
+            poJSON = new JSONObject();
+            poJSON.put("result", "error");
+            poJSON.put("message", "No record loaded.");
+            return poJSON;
         }
-        return loJSON;
+        
+        return poJSON;
     }
 }
