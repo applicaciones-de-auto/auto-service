@@ -258,9 +258,9 @@ public class JobOrder_Master implements GTransaction{
     
     
     public JSONObject searchTransaction(String fsValue, boolean fbByCode) {
-        String lsHeader = "JO Date»JO No»Customer»CS No»Plate No»Cancelled";
-        String lsColName = "dTransact»sVSPNOxxx»sCompnyNm»sCSNoxxxx»sPlateNox»sTrStatus";
-        String lsSQL = poModel.makeSelectSQL();
+        String lsHeader = "JO Date»JO No»Customer»CS No»Plate No»Status";
+        String lsColName = "dTransact»sVSPNOxxx»sOwnrNmxx»sCSNoxxxx»sPlateNox»sTranStat";
+        String lsSQL = poModel.getSQL();
         System.out.println(lsSQL);
         JSONObject loJSON = SearchDialog.jsonSearch(
                     poGRider,
@@ -310,9 +310,9 @@ public class JobOrder_Master implements GTransaction{
     public JSONObject searchVSP(String fsValue){
         JSONObject loJSON = new JSONObject(); 
         String lsHeader = "VSP Date»VSP No»Customer»CS No»Plate No";
-        String lsColName = "dTransact»sVSPNOxxx»sCompnyNm»sCSNoxxxx»sPlateNox";
+        String lsColName = "dTransact»sVSPNOxxx»sBuyCltNm»sCSNoxxxx»sPlateNox";
         String lsCriteria = "a.dTransact»a.sVSPNOxxx»b.sCompnyNm»p.sCSNoxxxx»q.sPlateNox";
-        String lsSQL = poVSPModel.getSQL();; 
+        String lsSQL = poVSPModel.getSQL();
         
         lsSQL = MiscUtil.addCondition(lsSQL,  " a.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                                                 + " AND b.sCompnyNm LIKE " + SQLUtil.toSQL(fsValue + "%")

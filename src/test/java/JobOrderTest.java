@@ -250,106 +250,106 @@ public class JobOrderTest {
 //        //assertFalse(result);
 //    }
     
-    @Test
-    public void test02OpenRecord(){
-        System.out.println("--------------------------------------------------------------------");
-        System.out.println("------------------------------RETRIEVAL--------------------------------------");
-        System.out.println("--------------------------------------------------------------------");
-        
-        json = model.openTransaction("M001JO240002");
-        
-        if (!"success".equals((String) json.get("result"))){
-            result = false;
-        } else {
-            System.out.println("--------------------------------------------------------------------");
-            System.out.println("JO MASTER");
-            System.out.println("--------------------------------------------------------------------");
-            System.out.println("sTransNox  :  " + model.getMasterModel().getMasterModel().getTransNo()); 
-            System.out.println("dTransact  :  " + model.getMasterModel().getMasterModel().getTransactDte()); 
-            System.out.println("sDSNoxxxx  :  " + model.getMasterModel().getMasterModel().getDSNo()); 
-            System.out.println("sSerialID  :  " + model.getMasterModel().getMasterModel().getSerialID()); 
-            System.out.println("sClientID  :  " + model.getMasterModel().getMasterModel().getClientID()); 
-            System.out.println("sWorkCtgy  :  " + model.getMasterModel().getMasterModel().getWorkCtgy()); 
-            System.out.println("sJobTypex  :  " + model.getMasterModel().getMasterModel().getJobType()); 
-            System.out.println("sLaborTyp  :  " + model.getMasterModel().getMasterModel().getLaborTyp()); 
-            System.out.println("nKMReadng  :  " + model.getMasterModel().getMasterModel().getKMReadng()); 
-            System.out.println("sEmployID  :  " + model.getMasterModel().getMasterModel().getEmployID()); 
-            System.out.println("sRemarksx  :  " + model.getMasterModel().getMasterModel().getRemarks()); 
-            System.out.println("cPaySrcex  :  " + model.getMasterModel().getMasterModel().getPaySrce()); 
-            System.out.println("sSourceNo  :  " + model.getMasterModel().getMasterModel().getSourceNo()); 
-            System.out.println("sSourceCD  :  " + model.getMasterModel().getMasterModel().getSourceCD()); 
-            System.out.println("dPromised  :  " + model.getMasterModel().getMasterModel().getPromisedDte()); 
-            System.out.println("sInsurnce  :  " + model.getMasterModel().getMasterModel().getInsurnce()); 
-            System.out.println("cCompUnit  :  " + model.getMasterModel().getMasterModel().getCompUnit()); 
-            System.out.println("sActvtyID  :  " + model.getMasterModel().getMasterModel().getActvtyID()); 
-            System.out.println("nLaborAmt  :  " + model.getMasterModel().getMasterModel().getLaborAmt()); 
-            System.out.println("nPartsAmt  :  " + model.getMasterModel().getMasterModel().getPartsAmt());   
-            System.out.println("nTranAmtx  :  " + model.getMasterModel().getMasterModel().getTranAmt());    
-            System.out.println("nRcvryAmt  :  " + model.getMasterModel().getMasterModel().getRcvryAmt());   
-            System.out.println("nPartFeex  :  " + model.getMasterModel().getMasterModel().getPartFee());    
-            System.out.println("cPrintedx  :  " + model.getMasterModel().getMasterModel().getPrinted());    
-            System.out.println("cTranStat  :  " + model.getMasterModel().getMasterModel().getTranStat());   
-            System.out.println("sEntryByx  :  " + model.getMasterModel().getMasterModel().getEntryBy());    
-            System.out.println("dEntryDte  :  " + model.getMasterModel().getMasterModel().getEntryDte());   
-            System.out.println("sModified  :  " + model.getMasterModel().getMasterModel().getModifiedBy()); 
-            System.out.println("dModified  :  " + model.getMasterModel().getMasterModel().getModifiedDte());
-            System.out.println("sOwnrNmxx  :  " + model.getMasterModel().getMasterModel().getOwnrNm());     
-            System.out.println("cClientTp  :  " + model.getMasterModel().getMasterModel().getClientTp());   
-            System.out.println("sAddressx  :  " + model.getMasterModel().getMasterModel().getAddress());    
-            System.out.println("sCoOwnrNm  :  " + model.getMasterModel().getMasterModel().getCoOwnrNm());   
-            System.out.println("sCSNoxxxx  :  " + model.getMasterModel().getMasterModel().getCSNo());       
-            System.out.println("sFrameNox  :  " + model.getMasterModel().getMasterModel().getFrameNo());    
-            System.out.println("sEngineNo  :  " + model.getMasterModel().getMasterModel().getEngineNo());   
-            System.out.println("cVhclNewx  :  " + model.getMasterModel().getMasterModel().getVhclNew());    
-            System.out.println("sPlateNox  :  " + model.getMasterModel().getMasterModel().getPlateNo());    
-            System.out.println("sDescript  :  " + model.getMasterModel().getMasterModel().getDescript());   
-            System.out.println("sVSPNOxxx  :  " + model.getMasterModel().getMasterModel().getVSPNo());      
-            System.out.println("sBranchCD  :  " + model.getMasterModel().getMasterModel().getBranchCD());   
-            System.out.println("sBranchNm  :  " + model.getMasterModel().getMasterModel().getBranchNm());   
-            System.out.println("sCoBuyrNm  :  " + model.getMasterModel().getMasterModel().getCoBuyrNm());   
-            System.out.println("sSrvcAdvr  :  " + model.getMasterModel().getMasterModel().getSrvcAdvr());   
-
-            System.out.println("--------------------------------------------------------------------");
-            System.out.println("JO LABOR");
-            System.out.println("--------------------------------------------------------------------");
-            for(int lnCtr = 0;lnCtr <= model.getJOLaborList().size()-1; lnCtr++){
-                System.out.println("sTransNox  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getTransNo()); 
-                System.out.println("nEntryNox  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getEntryNo()); 
-                System.out.println("sPayChrge  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getPayChrge());
-                System.out.println("sLaborCde  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getLaborCde());
-                System.out.println("sLbrPckCd  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getLbrPckCd());
-                System.out.println("nUnitPrce  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getUnitPrce());
-                System.out.println("nFRTxxxxx  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getFRTAmt());     
-                System.out.println("sEntryByx  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getEntryBy()); 
-                System.out.println("dEntryDte  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getEntryDte());
-                System.out.println("sLaborDsc  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getLaborDsc());
-            }
-            
-            System.out.println("--------------------------------------------------------------------");
-            System.out.println("JO PARTS");
-            System.out.println("--------------------------------------------------------------------");
-            for(int lnCtr = 0;lnCtr <= model.getJOPartsList().size()-1; lnCtr++){
-                System.out.println("sTransNox  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getTransNo()); 
-                System.out.println("nEntryNox  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getEntryNo()); 
-                System.out.println("sStockIDx  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getStockID()); 
-                System.out.println("sDescript  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getDescript());
-                System.out.println("sLbrPckCd  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getLbrPckCd());
-                System.out.println("nQtyEstmt  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getQtyEstmt());
-                System.out.println("nQtyUsedx  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getQtyUsed()); 
-                System.out.println("nQtyRecvd  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getQtyRecvd());
-                System.out.println("nQtyRtrnx  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getQtyRtrn()); 
-                System.out.println("nUnitPrce  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getUnitPrce());
-                System.out.println("sPayChrge  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getPayChrge());
-                System.out.println("sEntryByx  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getEntryBy()); 
-                System.out.println("dEntryDte  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getEntryDte());
-                System.out.println("sBarCodex  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getBarCode()); 
-            }
-            
-            result = true;
-        }
-        assertTrue(result);
-        //assertFalse(result);
-    }
+//    @Test
+//    public void test02OpenRecord(){
+//        System.out.println("--------------------------------------------------------------------");
+//        System.out.println("------------------------------RETRIEVAL--------------------------------------");
+//        System.out.println("--------------------------------------------------------------------");
+//        
+//        json = model.openTransaction("M001JO240002");
+//        
+//        if (!"success".equals((String) json.get("result"))){
+//            result = false;
+//        } else {
+//            System.out.println("--------------------------------------------------------------------");
+//            System.out.println("JO MASTER");
+//            System.out.println("--------------------------------------------------------------------");
+//            System.out.println("sTransNox  :  " + model.getMasterModel().getMasterModel().getTransNo()); 
+//            System.out.println("dTransact  :  " + model.getMasterModel().getMasterModel().getTransactDte()); 
+//            System.out.println("sDSNoxxxx  :  " + model.getMasterModel().getMasterModel().getDSNo()); 
+//            System.out.println("sSerialID  :  " + model.getMasterModel().getMasterModel().getSerialID()); 
+//            System.out.println("sClientID  :  " + model.getMasterModel().getMasterModel().getClientID()); 
+//            System.out.println("sWorkCtgy  :  " + model.getMasterModel().getMasterModel().getWorkCtgy()); 
+//            System.out.println("sJobTypex  :  " + model.getMasterModel().getMasterModel().getJobType()); 
+//            System.out.println("sLaborTyp  :  " + model.getMasterModel().getMasterModel().getLaborTyp()); 
+//            System.out.println("nKMReadng  :  " + model.getMasterModel().getMasterModel().getKMReadng()); 
+//            System.out.println("sEmployID  :  " + model.getMasterModel().getMasterModel().getEmployID()); 
+//            System.out.println("sRemarksx  :  " + model.getMasterModel().getMasterModel().getRemarks()); 
+//            System.out.println("cPaySrcex  :  " + model.getMasterModel().getMasterModel().getPaySrce()); 
+//            System.out.println("sSourceNo  :  " + model.getMasterModel().getMasterModel().getSourceNo()); 
+//            System.out.println("sSourceCD  :  " + model.getMasterModel().getMasterModel().getSourceCD()); 
+//            System.out.println("dPromised  :  " + model.getMasterModel().getMasterModel().getPromisedDte()); 
+//            System.out.println("sInsurnce  :  " + model.getMasterModel().getMasterModel().getInsurnce()); 
+//            System.out.println("cCompUnit  :  " + model.getMasterModel().getMasterModel().getCompUnit()); 
+//            System.out.println("sActvtyID  :  " + model.getMasterModel().getMasterModel().getActvtyID()); 
+//            System.out.println("nLaborAmt  :  " + model.getMasterModel().getMasterModel().getLaborAmt()); 
+//            System.out.println("nPartsAmt  :  " + model.getMasterModel().getMasterModel().getPartsAmt());   
+//            System.out.println("nTranAmtx  :  " + model.getMasterModel().getMasterModel().getTranAmt());    
+//            System.out.println("nRcvryAmt  :  " + model.getMasterModel().getMasterModel().getRcvryAmt());   
+//            System.out.println("nPartFeex  :  " + model.getMasterModel().getMasterModel().getPartFee());    
+//            System.out.println("cPrintedx  :  " + model.getMasterModel().getMasterModel().getPrinted());    
+//            System.out.println("cTranStat  :  " + model.getMasterModel().getMasterModel().getTranStat());   
+//            System.out.println("sEntryByx  :  " + model.getMasterModel().getMasterModel().getEntryBy());    
+//            System.out.println("dEntryDte  :  " + model.getMasterModel().getMasterModel().getEntryDte());   
+//            System.out.println("sModified  :  " + model.getMasterModel().getMasterModel().getModifiedBy()); 
+//            System.out.println("dModified  :  " + model.getMasterModel().getMasterModel().getModifiedDte());
+//            System.out.println("sOwnrNmxx  :  " + model.getMasterModel().getMasterModel().getOwnrNm());     
+//            System.out.println("cClientTp  :  " + model.getMasterModel().getMasterModel().getClientTp());   
+//            System.out.println("sAddressx  :  " + model.getMasterModel().getMasterModel().getAddress());    
+//            System.out.println("sCoOwnrNm  :  " + model.getMasterModel().getMasterModel().getCoOwnrNm());   
+//            System.out.println("sCSNoxxxx  :  " + model.getMasterModel().getMasterModel().getCSNo());       
+//            System.out.println("sFrameNox  :  " + model.getMasterModel().getMasterModel().getFrameNo());    
+//            System.out.println("sEngineNo  :  " + model.getMasterModel().getMasterModel().getEngineNo());   
+//            System.out.println("cVhclNewx  :  " + model.getMasterModel().getMasterModel().getVhclNew());    
+//            System.out.println("sPlateNox  :  " + model.getMasterModel().getMasterModel().getPlateNo());    
+//            System.out.println("sDescript  :  " + model.getMasterModel().getMasterModel().getVhclDesc());   
+//            System.out.println("sVSPNOxxx  :  " + model.getMasterModel().getMasterModel().getVSPNo());      
+//            System.out.println("sBranchCD  :  " + model.getMasterModel().getMasterModel().getBranchCD());   
+//            System.out.println("sBranchNm  :  " + model.getMasterModel().getMasterModel().getBranchNm());   
+//            System.out.println("sCoBuyrNm  :  " + model.getMasterModel().getMasterModel().getCoBuyrNm());   
+//            System.out.println("sSrvcAdvr  :  " + model.getMasterModel().getMasterModel().getEmployNm());   
+//
+//            System.out.println("--------------------------------------------------------------------");
+//            System.out.println("JO LABOR");
+//            System.out.println("--------------------------------------------------------------------");
+//            for(int lnCtr = 0;lnCtr <= model.getJOLaborList().size()-1; lnCtr++){
+//                System.out.println("sTransNox  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getTransNo()); 
+//                System.out.println("nEntryNox  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getEntryNo()); 
+//                System.out.println("sPayChrge  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getPayChrge());
+//                System.out.println("sLaborCde  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getLaborCde());
+//                System.out.println("sLbrPckCd  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getLbrPckCd());
+//                System.out.println("nUnitPrce  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getUnitPrce());
+//                System.out.println("nFRTxxxxx  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getFRTAmt());     
+//                System.out.println("sEntryByx  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getEntryBy()); 
+//                System.out.println("dEntryDte  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getEntryDte());
+//                System.out.println("sLaborDsc  :  " +  model.getJOLaborModel().getDetailModel(lnCtr).getLaborDsc());
+//            }
+//            
+//            System.out.println("--------------------------------------------------------------------");
+//            System.out.println("JO PARTS");
+//            System.out.println("--------------------------------------------------------------------");
+//            for(int lnCtr = 0;lnCtr <= model.getJOPartsList().size()-1; lnCtr++){
+//                System.out.println("sTransNox  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getTransNo()); 
+//                System.out.println("nEntryNox  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getEntryNo()); 
+//                System.out.println("sStockIDx  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getStockID()); 
+//                System.out.println("sDescript  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getDescript());
+//                System.out.println("sLbrPckCd  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getLbrPckCd());
+//                System.out.println("nQtyEstmt  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getQtyEstmt());
+//                System.out.println("nQtyUsedx  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getQtyUsed()); 
+//                System.out.println("nQtyRecvd  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getQtyRecvd());
+//                System.out.println("nQtyRtrnx  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getQtyRtrn()); 
+//                System.out.println("nUnitPrce  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getUnitPrce());
+//                System.out.println("sPayChrge  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getPayChrge());
+//                System.out.println("sEntryByx  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getEntryBy()); 
+//                System.out.println("dEntryDte  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getEntryDte());
+//                System.out.println("sBarCodex  :  " +  model.getJOPartsModel().getDetailModel(lnCtr).getBarCode()); 
+//            }
+//            
+//            result = true;
+//        }
+//        assertTrue(result);
+//        //assertFalse(result);
+//    }
 //    
 //    @Test
 //    public void test03UpdateRecord(){

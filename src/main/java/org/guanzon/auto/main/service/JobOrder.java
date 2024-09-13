@@ -12,6 +12,7 @@ import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.iface.GTransaction;
 import org.guanzon.auto.controller.sales.VehicleSalesProposal_Labor;
 import org.guanzon.auto.controller.sales.VehicleSalesProposal_Parts;
+import org.guanzon.auto.controller.service.Intake_Technician;
 import org.guanzon.auto.controller.service.JobOrder_Labor;
 import org.guanzon.auto.controller.service.JobOrder_Master;
 import org.guanzon.auto.controller.service.JobOrder_Parts;
@@ -32,6 +33,7 @@ public class JobOrder implements GTransaction{
     JobOrder_Master poController;
     JobOrder_Labor poJOLabor;
     JobOrder_Parts poJOParts;
+    Intake_Technician poIntakeTechnician;
     
     VehicleSalesProposal_Labor poVSPLabor;
     VehicleSalesProposal_Parts poVSPParts;
@@ -40,6 +42,7 @@ public class JobOrder implements GTransaction{
         poController = new JobOrder_Master(foAppDrver,fbWtParent,fsBranchCd);
         poJOLabor = new JobOrder_Labor(foAppDrver);
         poJOParts = new JobOrder_Parts(foAppDrver);
+        poIntakeTechnician = new Intake_Technician(foAppDrver);
         poVSPLabor = new VehicleSalesProposal_Labor(foAppDrver);
         poVSPParts = new VehicleSalesProposal_Parts(foAppDrver);
         
@@ -117,6 +120,12 @@ public class JobOrder implements GTransaction{
             pnEditMode = EditMode.UNKNOWN;
             return poJSON;
         }
+        
+        poJSON = poIntakeTechnician.openDetail(fsValue);
+        if(!"success".equals((String) checkData(poJSON).get("result"))){
+            pnEditMode = EditMode.UNKNOWN;
+            return poJSON;
+        }
 
         return poJSON;
     }
@@ -163,6 +172,13 @@ public class JobOrder implements GTransaction{
         
         poJOParts.setTargetBranchCd(poController.getMasterModel().getBranchCD());
         poJSON =  poJOParts.saveDetail((String) poController.getMasterModel().getTransNo());
+        if("error".equalsIgnoreCase((String)checkData(poJSON).get("result"))){
+            if (!pbWtParent) poGRider.rollbackTrans();
+            return checkData(poJSON);
+        }
+        
+        poIntakeTechnician.setTargetBranchCd(poController.getMasterModel().getBranchCD());
+        poJSON =  poIntakeTechnician.saveDetail((String) poController.getMasterModel().getTransNo());
         if("error".equalsIgnoreCase((String)checkData(poJSON).get("result"))){
             if (!pbWtParent) poGRider.rollbackTrans();
             return checkData(poJSON);
@@ -259,6 +275,11 @@ public class JobOrder implements GTransaction{
     public Object addJOParts(){ return poJOParts.addDetail(poController.getMasterModel().getTransNo());}
     public Object removeJOParts(int fnRow){ return poJOParts.removeDetail(fnRow);}
     
+    public Intake_Technician getJOTechModel(){return poIntakeTechnician;} 
+    public ArrayList getJOTechList(){return poIntakeTechnician.getDetailList();}
+    public Object addJOTech(){ return poIntakeTechnician.addDetail(poController.getMasterModel().getTransNo());}
+    public Object removeJOTech(int fnRow){ return poIntakeTechnician.removeDetail(fnRow);}
+    
     public JSONObject computeAmount(){
         JSONObject loJSON = new JSONObject();
         int lnCtr = 0;
@@ -294,36 +315,39 @@ public class JobOrder implements GTransaction{
     
     public JSONObject searchVSP(String fsValue){
         JSONObject loJSON = new JSONObject();
+        JSONObject loJSONDet = new JSONObject();
         loJSON = poController.searchVSP(fsValue);
         if(!"error".equals((String) loJSON.get("result"))){
-            loJSON = poVSPLabor.openDetail((String) loJSON.get("sTransNox"));
-            if( "error".equals((String) loJSON.get("result"))){
-                return loJSON;
+            loJSONDet = poVSPLabor.openDetail((String) loJSON.get("sTransNox"));
+            if( "error".equals((String) loJSONDet.get("result"))){
+                return loJSONDet;
             }
             
-            loJSON = poVSPParts.openDetail((String) loJSON.get("sTransNox"));
-            if( "error".equals((String) loJSON.get("result"))){
-                return loJSON;
+            loJSONDet = poVSPParts.openDetail((String) loJSON.get("sTransNox"));
+            if( "error".equals((String) loJSONDet.get("result"))){
+                return loJSONDet;
             }
             
-            poController.getMasterModel().setSourceNo((String) poJSON.get("sTransNox"));
-            poController.getMasterModel().setVSPNo((String) poJSON.get("sVSPNOxxx"));
-            poController.getMasterModel().setSerialID((String) poJSON.get("sSerialID"));
-            poController.getMasterModel().setClientID((String) poJSON.get("sClientID"));
-            poController.getMasterModel().setOwnrNm((String) poJSON.get("sBuyCltNm"));
-            poController.getMasterModel().setClientTp((String) poJSON.get("cClientTp"));
-            poController.getMasterModel().setAddress((String) poJSON.get("sAddressx"));
-            poController.getMasterModel().setCSNo((String) poJSON.get("sCSNoxxxx"));
-            poController.getMasterModel().setPlateNo((String) poJSON.get("sPlateNox"));
-            poController.getMasterModel().setFrameNo((String) poJSON.get("sFrameNox"));
-            poController.getMasterModel().setEngineNo((String) poJSON.get("sEngineNo"));
-            poController.getMasterModel().setVhclDesc((String) poJSON.get("sVhclFDsc"));
-            poController.getMasterModel().setBranchCD((String) poJSON.get("sBranchCD"));
-            poController.getMasterModel().setBranchNm((String) poJSON.get("sBranchNm"));
-            poController.getMasterModel().setEmployID((String) poJSON.get("sEmployID"));
-            poController.getMasterModel().setEmployNm((String) poJSON.get("sSENamexx"));
+            poController.getMasterModel().setSourceCD("VSP");
+            poController.getMasterModel().setSourceNo((String) loJSON.get("sTransNox"));
+            poController.getMasterModel().setVSPNo((String) loJSON.get("sVSPNOxxx"));
+            poController.getMasterModel().setSerialID((String) loJSON.get("sSerialID"));
+            poController.getMasterModel().setClientID((String) loJSON.get("sClientID"));
+            poController.getMasterModel().setOwnrNm((String) loJSON.get("sBuyCltNm"));
+            poController.getMasterModel().setClientTp((String) loJSON.get("cClientTp"));
+            poController.getMasterModel().setAddress((String) loJSON.get("sAddressx"));
+            poController.getMasterModel().setCSNo((String) loJSON.get("sCSNoxxxx"));
+            poController.getMasterModel().setPlateNo((String) loJSON.get("sPlateNox"));
+            poController.getMasterModel().setFrameNo((String) loJSON.get("sFrameNox"));
+            poController.getMasterModel().setEngineNo((String) loJSON.get("sEngineNo"));
+            poController.getMasterModel().setVhclDesc((String) loJSON.get("sVhclFDsc"));
+            poController.getMasterModel().setBranchCD((String) loJSON.get("sBranchCD"));
+            poController.getMasterModel().setBranchNm((String) loJSON.get("sBranchNm"));
+            poController.getMasterModel().setEmployID((String) loJSON.get("sEmployID"));
+            poController.getMasterModel().setEmployNm((String) loJSON.get("sSENamexx"));
             
         } else {
+            poController.getMasterModel().setSourceCD("");
             poController.getMasterModel().setSourceNo("");        
             poController.getMasterModel().setVSPNo("");           
             poController.getMasterModel().setSerialID("");        
@@ -351,15 +375,19 @@ public class JobOrder implements GTransaction{
     public ArrayList getVSPPartsList(){return poVSPParts.getDetailList();}
     
     
-    public JSONObject searchServiceAdvisor(String fsValue){
+    public JSONObject searchEmployee(String fsValue, boolean fbIsTechnician){
         JSONObject loJSON = new JSONObject();
         loJSON = poController.searchEmployee(fsValue);
         if(!"error".equals((String) poJSON.get("result"))){
-            poController.getMasterModel().setEmployID((String) poJSON.get("sClientID"));
-            poController.getMasterModel().setEmployNm((String) poJSON.get("sCompnyNm"));
+            if(!fbIsTechnician){
+                poController.getMasterModel().setEmployID((String) poJSON.get("sClientID"));
+                poController.getMasterModel().setEmployNm((String) poJSON.get("sCompnyNm"));
+            }
         } else {
-            poController.getMasterModel().setEmployID("");
-            poController.getMasterModel().setEmployNm("");
+            if(!fbIsTechnician){
+                poController.getMasterModel().setEmployID("");
+                poController.getMasterModel().setEmployNm("");
+            }
         }
         return loJSON;
     }
