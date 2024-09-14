@@ -313,10 +313,10 @@ public class JobOrder implements GTransaction{
         return loJSON;
     }
     
-    public JSONObject searchVSP(String fsValue){
+    public JSONObject searchVSP(String fsValue, boolean fbByCode){
         JSONObject loJSON = new JSONObject();
         JSONObject loJSONDet = new JSONObject();
-        loJSON = poController.searchVSP(fsValue);
+        loJSON = poController.searchVSP(fsValue,fbByCode);
         if(!"error".equals((String) loJSON.get("result"))){
             loJSONDet = poVSPLabor.openDetail((String) loJSON.get("sTransNox"));
             if( "error".equals((String) loJSONDet.get("result"))){

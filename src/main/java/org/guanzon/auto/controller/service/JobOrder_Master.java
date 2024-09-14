@@ -307,18 +307,32 @@ public class JobOrder_Master implements GTransaction{
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
-    public JSONObject searchVSP(String fsValue){
+    public JSONObject searchVSP(String fsValue, boolean fbByCode){
         JSONObject loJSON = new JSONObject(); 
-        String lsHeader = "VSP Date»VSP No»Customer»CS No»Plate No";
-        String lsColName = "dTransact»sVSPNOxxx»sBuyCltNm»sCSNoxxxx»sPlateNox";
-        String lsCriteria = "a.dTransact»a.sVSPNOxxx»b.sCompnyNm»p.sCSNoxxxx»q.sPlateNox";
+        String lsID = "sVSPNOxxx";
+        if(fbByCode){
+            lsID = "sTransNox";
+        }
+        String lsHeader = "VSP No»Customer»CS No»Plate No";//VSP Date»
+        String lsColName = lsID+"»sBuyCltNm»sCSNoxxxx»sPlateNox"; //"dTransact»"+
+        String lsCriteria = "a."+lsID+"»b.sCompnyNm»p.sCSNoxxxx»q.sPlateNox"; //a.dTransact»
         String lsSQL = poVSPModel.getSQL();
         
-        lsSQL = MiscUtil.addCondition(lsSQL,  " a.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+        if(fbByCode){
+            lsSQL = MiscUtil.addCondition(lsSQL,  " a.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                                                + " AND a.sTransNox = " + SQLUtil.toSQL(fsValue)
+                                                + " AND (a.sTransNox IN (SELECT vsp_labor.sTransNox FROM vsp_labor WHERE vsp_labor.sTransNox = a.sTransNox ) " 
+                                                + " OR a.sTransNox IN (SELECT vsp_parts.sTransNox FROM vsp_parts WHERE vsp_parts.sTransNox = a.sTransNox )) " 
+                                                + " GROUP BY a.sTransNox ");
+        
+        } else {
+            lsSQL = MiscUtil.addCondition(lsSQL,  " a.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
                                                 + " AND b.sCompnyNm LIKE " + SQLUtil.toSQL(fsValue + "%")
                                                 + " AND (a.sTransNox IN (SELECT vsp_labor.sTransNox FROM vsp_labor WHERE vsp_labor.sTransNox = a.sTransNox ) " 
                                                 + " OR a.sTransNox IN (SELECT vsp_parts.sTransNox FROM vsp_parts WHERE vsp_parts.sTransNox = a.sTransNox )) " 
                                                 + " GROUP BY a.sTransNox ");
+        
+        }
         System.out.println("SEARCH VSP: " + lsSQL);
         loJSON = ShowDialogFX.Search(poGRider,
                 lsSQL,
@@ -326,7 +340,7 @@ public class JobOrder_Master implements GTransaction{
                     lsHeader,
                     lsColName,
                     lsCriteria,
-                1);
+                    0);
 
         if (loJSON != null) {
         } else {
