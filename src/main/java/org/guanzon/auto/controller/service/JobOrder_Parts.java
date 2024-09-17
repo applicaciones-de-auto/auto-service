@@ -115,6 +115,7 @@ public class JobOrder_Parts  implements GTranDet{
 //                paDetail = new ArrayList<>();
 //                addDetail(fsValue);
                 poJSON.put("result", "error");
+                poJSON.put("continue", true);
                 poJSON.put("message", "No record selected.");
             }
             MiscUtil.close(loRS);
@@ -286,7 +287,10 @@ public class JobOrder_Parts  implements GTranDet{
 
     @Override
     public int getItemCount() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if(paDetail == null){
+           paDetail = new ArrayList<>();
+        }
+        return paDetail.size();
     }
 
     @Override

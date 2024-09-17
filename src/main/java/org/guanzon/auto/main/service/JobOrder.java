@@ -109,20 +109,20 @@ public class JobOrder implements GTransaction{
             pnEditMode = EditMode.UNKNOWN;
         }
         
-        poJSON = poJOLabor.openDetail(fsValue);
-        if(!"success".equals((String) checkData(poJSON).get("result"))){
+        poJSON = checkData(poJOLabor.openDetail(fsValue));
+        if(!"success".equals((String) poJSON.get("result"))){
             pnEditMode = EditMode.UNKNOWN;
             return poJSON;
         }
         
-        poJSON = poJOParts.openDetail(fsValue);
-        if(!"success".equals((String) checkData(poJSON).get("result"))){
+        poJSON =  checkData(poJOParts.openDetail(fsValue));
+        if(!"success".equals((String) poJSON.get("result"))){
             pnEditMode = EditMode.UNKNOWN;
             return poJSON;
         }
         
-        poJSON = poIntakeTechnician.openDetail(fsValue);
-        if(!"success".equals((String) checkData(poJSON).get("result"))){
+        poJSON =  checkData(poIntakeTechnician.openDetail(fsValue));
+        if(!"success".equals((String) poJSON.get("result"))){
             pnEditMode = EditMode.UNKNOWN;
             return poJSON;
         }
