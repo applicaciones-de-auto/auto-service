@@ -26,7 +26,7 @@ import org.json.simple.JSONObject;
 public class Intake_Technician implements GTranDet {
     final String XML = "Model_Intake_Technician.xml";
     GRider poGRider;
-    String psTargetBranchCd = "";
+//    String psTargetBranchCd = ""; JO will not required to tra
     boolean pbWtParent;
     
     int pnEditMode;
@@ -170,7 +170,7 @@ public class Intake_Technician implements GTranDet {
             //}
             
             paDetail.get(lnCtr).setDiagNo(fsTransNo);
-            paDetail.get(lnCtr).setTargetBranchCd(psTargetBranchCd);
+//            paDetail.get(lnCtr).setTargetBranchCd(psTargetBranchCd);
             
             ValidatorInterface validator = ValidatorFactory.make(ValidatorFactory.TYPE.Intake_Technician, paDetail.get(lnCtr));
             validator.setGRider(poGRider);
@@ -184,9 +184,9 @@ public class Intake_Technician implements GTranDet {
         
         return obj;
     }
-    public void setTargetBranchCd(String fsBranchCd){
-        psTargetBranchCd = fsBranchCd;
-    }
+//    public void setTargetBranchCd(String fsBranchCd){
+//        psTargetBranchCd = fsBranchCd;
+//    }
     
     public Object removeDetail(int fnRow){
         JSONObject loJSON = new JSONObject();

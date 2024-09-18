@@ -14,6 +14,7 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.iface.GTranDet;
+import org.guanzon.auto.model.parts.Model_Inventory_Information;
 import org.guanzon.auto.model.service.Model_JobOrder_Parts;
 import org.guanzon.auto.validator.service.ValidatorFactory;
 import org.guanzon.auto.validator.service.ValidatorInterface;
@@ -26,7 +27,7 @@ import org.json.simple.JSONObject;
 public class JobOrder_Parts  implements GTranDet{
     final String XML = "Model_JobOrder_Parts.xml";
     GRider poGRider;
-    String psTargetBranchCd = "";
+//    String psTargetBranchCd = ""; JO will not required to transfer to branches
     boolean pbWtParent;
     
     int pnEditMode;
@@ -83,12 +84,8 @@ public class JobOrder_Parts  implements GTranDet{
         paDetail = new ArrayList<>();
         paRemDetail = new ArrayList<>();
         poJSON = new JSONObject();
-        String lsSQL =    "  SELECT "                                                  
-                        + "   sTransNox "   
-                        + " , nEntryNox "   
-                        + " , sStockIDx "   
-                        + " , sDescript "                                              
-                        + "  FROM diagnostic_parts " ;
+        Model_JobOrder_Parts loEntity = new Model_JobOrder_Parts(poGRider);
+        String lsSQL =  loEntity.makeSelectSQL();
         lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsValue))
                                                 + "  ORDER BY nEntryNox ASC " ;
         System.out.println(lsSQL);
@@ -169,7 +166,7 @@ public class JobOrder_Parts  implements GTranDet{
             
             paDetail.get(lnCtr).setTransNo(fsTransNo);
             paDetail.get(lnCtr).setEntryNo(lnCtr+1);
-            paDetail.get(lnCtr).setTargetBranchCd(psTargetBranchCd);
+//            paDetail.get(lnCtr).setTargetBranchCd(psTargetBranchCd);
             
             ValidatorInterface validator = ValidatorFactory.make(ValidatorFactory.TYPE.JobOrder_Parts, paDetail.get(lnCtr));
             validator.setGRider(poGRider);
@@ -184,9 +181,9 @@ public class JobOrder_Parts  implements GTranDet{
         return obj;
     }
     
-    public void setTargetBranchCd(String fsBranchCd){
-        psTargetBranchCd = fsBranchCd; 
-    }
+//    public void setTargetBranchCd(String fsBranchCd){
+//        psTargetBranchCd = fsBranchCd; 
+//    }
     
     public ArrayList<Model_JobOrder_Parts> getDetailList(){
         if(paDetail == null){
@@ -255,12 +252,13 @@ public class JobOrder_Parts  implements GTranDet{
         String lsHeader = "ID»Description";
         String lsColName = "sBarCodex»sDescript"; 
         String lsCriteria = "sBarCodex»sDescript";
-        
-        String lsSQL =   " SELECT "                                             
-                + "   sBarCodex "                                      
-                + " , sDescript "                                      
-                + " , cRecdStat "                                      
-                + " FROM inventory " ; 
+        Model_Inventory_Information loEntity = new Model_Inventory_Information(poGRider);
+        String lsSQL = loEntity.makeSelectSQL();
+//        String lsSQL =   " SELECT "                                             
+//                + "   sBarCodex "                                      
+//                + " , sDescript "                                      
+//                + " , cRecdStat "                                      
+//                + " FROM inventory " ; 
         lsSQL = MiscUtil.addCondition(lsSQL,  " cRecdStat = '1' "
                                                 + " AND sBarCodex LIKE " + SQLUtil.toSQL(fsValue + "%"));
         

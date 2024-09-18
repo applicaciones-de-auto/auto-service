@@ -163,21 +163,21 @@ public class JobOrder implements GTransaction{
             return checkData(poJSON);
         }
         
-        poJOLabor.setTargetBranchCd(poController.getMasterModel().getBranchCD());
+//        poJOLabor.setTargetBranchCd(poController.getMasterModel().getBranchCD());
         poJSON =  poJOLabor.saveDetail((String) poController.getMasterModel().getTransNo());
         if("error".equalsIgnoreCase((String)checkData(poJSON).get("result"))){
             if (!pbWtParent) poGRider.rollbackTrans();
             return checkData(poJSON);
         }
         
-        poJOParts.setTargetBranchCd(poController.getMasterModel().getBranchCD());
+//        poJOParts.setTargetBranchCd(poController.getMasterModel().getBranchCD());
         poJSON =  poJOParts.saveDetail((String) poController.getMasterModel().getTransNo());
         if("error".equalsIgnoreCase((String)checkData(poJSON).get("result"))){
             if (!pbWtParent) poGRider.rollbackTrans();
             return checkData(poJSON);
         }
         
-        poIntakeTechnician.setTargetBranchCd(poController.getMasterModel().getBranchCD());
+//        poIntakeTechnician.setTargetBranchCd(poController.getMasterModel().getBranchCD());
         poJSON =  poIntakeTechnician.saveDetail((String) poController.getMasterModel().getTransNo());
         if("error".equalsIgnoreCase((String)checkData(poJSON).get("result"))){
             if (!pbWtParent) poGRider.rollbackTrans();
@@ -232,8 +232,7 @@ public class JobOrder implements GTransaction{
 
     @Override
     public JSONObject cancelTransaction(String fsValue) {
-        poJSON =  poController.cancelTransaction(fsValue);
-        return poJSON;
+        return poController.cancelTransaction(fsValue);
     }
 
     @Override

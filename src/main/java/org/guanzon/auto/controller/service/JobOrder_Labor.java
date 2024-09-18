@@ -26,7 +26,7 @@ import org.json.simple.JSONObject;
 public class JobOrder_Labor implements GTranDet {
     final String XML = "Model_JobOrder_Labor.xml";
     GRider poGRider;
-    String psTargetBranchCd = "";
+//    String psTargetBranchCd = ""; //JO will not required to transfer to branches
     boolean pbWtParent;
     
     int pnEditMode;
@@ -89,11 +89,8 @@ public class JobOrder_Labor implements GTranDet {
         paDetail = new ArrayList<>();
         paRemDetail = new ArrayList<>();
         poJSON = new JSONObject();
-        String lsSQL =    "  SELECT "                                                  
-                        + "   sTransNox "   
-                        + " , nEntryNox "   
-                        + " , sLaborCde "                                               
-                        + "  FROM diagnostic_labor " ;
+        Model_JobOrder_Labor loEntity = new Model_JobOrder_Labor(poGRider);
+        String lsSQL =  loEntity.makeSelectSQL();
         lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsValue))
                                                 + "  ORDER BY nEntryNox ASC " ;
         System.out.println(lsSQL);
@@ -170,7 +167,7 @@ public class JobOrder_Labor implements GTranDet {
             
             paDetail.get(lnCtr).setTransNo(fsTransNo);
             paDetail.get(lnCtr).setEntryNo(lnCtr+1);
-            paDetail.get(lnCtr).setTargetBranchCd(psTargetBranchCd);
+           // paDetail.get(lnCtr).setTargetBranchCd(psTargetBranchCd);
             
             ValidatorInterface validator = ValidatorFactory.make(ValidatorFactory.TYPE.JobOrder_Labor, paDetail.get(lnCtr));
             validator.setGRider(poGRider);
@@ -184,9 +181,10 @@ public class JobOrder_Labor implements GTranDet {
         
         return obj;
     }
-    public void setTargetBranchCd(String fsBranchCd){
-        psTargetBranchCd = fsBranchCd;
-    }
+    
+//    public void setTargetBranchCd(String fsBranchCd){
+//        psTargetBranchCd = fsBranchCd;
+//    }
     
     public Object removeDetail(int fnRow){
         JSONObject loJSON = new JSONObject();
