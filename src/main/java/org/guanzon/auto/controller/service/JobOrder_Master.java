@@ -259,7 +259,7 @@ public class JobOrder_Master implements GTransaction{
     
     public JSONObject searchTransaction(String fsValue, boolean fbByCode) {
         String lsHeader = "JO Date»JO No»Customer»CS No»Plate No»Status";
-        String lsColName = "dTransact»sVSPNOxxx»sOwnrNmxx»sCSNoxxxx»sPlateNox»sTranStat";
+        String lsColName = "dTransact»sDSNoxxxx»sOwnrNmxx»sCSNoxxxx»sPlateNox»sTranStat";
         String lsSQL = poModel.getSQL();
         System.out.println(lsSQL);
         JSONObject loJSON = SearchDialog.jsonSearch(

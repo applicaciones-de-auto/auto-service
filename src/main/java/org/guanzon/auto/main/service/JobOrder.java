@@ -6,9 +6,16 @@
 package org.guanzon.auto.main.service;
 
 import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.guanzon.appdriver.base.GRider;
+import org.guanzon.appdriver.base.MiscUtil;
+import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
+import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GTransaction;
 import org.guanzon.auto.controller.sales.VehicleSalesProposal_Labor;
 import org.guanzon.auto.controller.sales.VehicleSalesProposal_Parts;
@@ -305,9 +312,9 @@ public class JobOrder implements GTransaction{
         JSONObject loJSON = new JSONObject();
         
         //Validate JO labor required
-        if(poJOLabor.getDetailList().size() - 1 < 0){
+        if(poJOLabor.getDetailList().size() - 1 < 0 && poJOParts.getDetailList().size() - 1 < 0){
             loJSON.put("result","error");
-            loJSON.put("message", "Job Order labor cannot be empty.");
+            loJSON.put("message", "Job Order Labor and Parts cannot be empty.");
         }
         return loJSON;
     }
@@ -391,4 +398,83 @@ public class JobOrder implements GTransaction{
         return loJSON;
     }
     
+    /**
+     * Check VSP Parts linked to JO
+     * @param fsValue parts Stock ID
+     * @param fnInputQty parts quantity to be input
+     * @param fnJoRow JO Row.
+    */
+    public JSONObject checkVSPJOParts(String fsValue, int fnInputQty, int fnJoRow, boolean fbIsAdd){ //, boolean fbIsAdd
+        JSONObject loJSON = new JSONObject();
+        int lnVSPQty = 0;
+        int lnTotalQty = 0;
+        
+        poVSPParts.openDetail(poController.getMasterModel().getSourceNo());
+        for (int lnCtr = 0; lnCtr <= poVSPParts.getDetailList().size() - 1; lnCtr++){
+            if((poVSPParts.getDetailModel(lnCtr).getStockID()).equals(fsValue)){
+                lnVSPQty = poVSPParts.getDetailModel(lnCtr).getQuantity();
+                break;
+            }
+        }
+        System.out.println(fsValue + " VSP Total Quantity : " + lnVSPQty);
+        
+        String lsSQL = poJOParts.getDetailModel(fnJoRow).makeSelectSQL();
+        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox <> " + SQLUtil.toSQL(poController.getMasterModel().getTransNo()) 
+                                                + " AND sStockIDx = " + SQLUtil.toSQL(fsValue)) 
+                                                + " AND sTransNox IN (SELECT diagnostic_master.sTransNox FROM diagnostic_master " 
+                                                +                    " WHERE diagnostic_master.cTranStat <> " + SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED) 
+                                                                    + " AND diagnostic_master.sSourceNo = " + SQLUtil.toSQL(poController.getMasterModel().getSourceNo()) + ")" ;
+        System.out.println(lsSQL);
+        ResultSet loRS = poGRider.executeQuery(lsSQL);
+        if (MiscUtil.RecordCount(loRS) > 0){
+            try {
+                while(loRS.next()){
+                    lnTotalQty = lnTotalQty +  loRS.getInt("nQtyEstmt") ;
+                }
+                
+                MiscUtil.close(loRS);  
+                System.out.println(fsValue + " VSP Parts Linked to JO Total Quantity : " + lnTotalQty);
+                
+                lnTotalQty = lnTotalQty + fnInputQty;
+            } catch (SQLException ex) {
+                Logger.getLogger(JobOrder.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        if(fbIsAdd){
+            fnInputQty = lnVSPQty - lnTotalQty;
+        }
+        
+//        if ((lnTotalQty == lnVSPQty)){
+//            loJSON.put("result", "error");
+//            loJSON.put("message", "VSP Parts quantity already settled.");
+//            return loJSON;
+//        }
+        
+        if ((lnTotalQty > lnVSPQty) || (fnInputQty > lnVSPQty)){
+            loJSON.put("result", "error");
+            loJSON.put("message", "Declared VSP Parts quantity must not be less than the quantity linked to JO Parts.");
+            return loJSON;
+        }
+
+        if (fnInputQty <= 0){
+            if(fbIsAdd){
+                loJSON.put("result", "error");
+                loJSON.put("message", "All remaining VSP Parts Quantity already linked to JO.");
+                return loJSON;
+            }else{
+                loJSON.put("result", "error");
+                loJSON.put("message", "Please input valid Parts Quantity.");
+                return loJSON;
+            }
+        }
+        
+//        if(fbIsAdd){
+//            poJOParts.getDetailModel(fnJoRow).setQtyEstmt(nVSPQty-nTotalQty);
+//        } else {
+            poJOParts.getDetailModel(fnJoRow).setQtyEstmt(fnInputQty);
+//        }
+          
+        return loJSON;
+    }
 }
