@@ -324,16 +324,6 @@ public class JobOrder implements GTransaction{
         JSONObject loJSONDet = new JSONObject();
         loJSON = poController.searchVSP(fsValue,fbByCode);
         if(!"error".equals((String) loJSON.get("result"))){
-            loJSONDet = poVSPLabor.openDetail((String) loJSON.get("sTransNox"));
-            if( "error".equals((String) loJSONDet.get("result"))){
-                return loJSONDet;
-            }
-            
-            loJSONDet = poVSPParts.openDetail((String) loJSON.get("sTransNox"));
-            if( "error".equals((String) loJSONDet.get("result"))){
-                return loJSONDet;
-            }
-            
             poController.getMasterModel().setSourceCD("VSP");
             poController.getMasterModel().setSourceNo((String) loJSON.get("sTransNox"));
             poController.getMasterModel().setVSPNo((String) loJSON.get("sVSPNOxxx"));
@@ -351,6 +341,17 @@ public class JobOrder implements GTransaction{
             poController.getMasterModel().setBranchNm((String) loJSON.get("sBranchNm"));
             poController.getMasterModel().setEmployID((String) loJSON.get("sEmployID"));
             poController.getMasterModel().setEmployNm((String) loJSON.get("sSENamexx"));
+            poController.getMasterModel().setCoBuyrNm((String) loJSON.get("sCoCltNmx"));
+            
+//            loJSONDet = loadVSPLabor();
+//            if( "error".equals((String) loJSONDet.get("result"))){
+//                return loJSONDet;
+//            }
+//            
+//            loJSONDet = loadVSPParts();
+//            if( "error".equals((String) loJSONDet.get("result"))){
+//                return loJSONDet;
+//            }
             
         } else {
             poController.getMasterModel().setSourceCD("");
@@ -369,8 +370,37 @@ public class JobOrder implements GTransaction{
             poController.getMasterModel().setBranchCD("");        
             poController.getMasterModel().setBranchNm("");        
             poController.getMasterModel().setEmployID("");        
-            poController.getMasterModel().setEmployNm("");
+            poController.getMasterModel().setEmployNm("");     
+            poController.getMasterModel().setCoBuyrNm("");
         }
+        return loJSON;
+    }
+    
+    public JSONObject loadVSPParts(){
+        JSONObject loJSON = new JSONObject();
+        if(poController.getMasterModel().getSourceNo() != null){
+            if(!poController.getMasterModel().getSourceNo().trim().isEmpty()){
+                loJSON = poVSPParts.openDetail(poController.getMasterModel().getSourceNo());
+                if( "error".equals((String) loJSON.get("result"))){
+                    return loJSON;
+                }
+            }
+        }
+        
+        return loJSON;
+    }
+    
+    public JSONObject loadVSPLabor(){
+        JSONObject loJSON = new JSONObject();
+        if(poController.getMasterModel().getSourceNo() != null){
+            if(!poController.getMasterModel().getSourceNo().trim().isEmpty()){
+                loJSON = poVSPLabor.openDetail(poController.getMasterModel().getSourceNo());
+                if( "error".equals((String) loJSON.get("result"))){
+                    return loJSON;
+                }
+            }
+        }
+        
         return loJSON;
     }
     
@@ -408,11 +438,13 @@ public class JobOrder implements GTransaction{
         JSONObject loJSON = new JSONObject();
         int lnVSPQty = 0;
         int lnTotalQty = 0;
+        String lsBarcode = "";
         
-        poVSPParts.openDetail(poController.getMasterModel().getSourceNo());
+        loadVSPParts();
         for (int lnCtr = 0; lnCtr <= poVSPParts.getDetailList().size() - 1; lnCtr++){
             if((poVSPParts.getDetailModel(lnCtr).getStockID()).equals(fsValue)){
                 lnVSPQty = poVSPParts.getDetailModel(lnCtr).getQuantity();
+                lsBarcode = poVSPParts.getDetailModel(lnCtr).getBarCode();
                 break;
             }
         }
@@ -460,7 +492,7 @@ public class JobOrder implements GTransaction{
         if (fnInputQty <= 0){
             if(fbIsAdd){
                 loJSON.put("result", "error");
-                loJSON.put("message", "All remaining VSP Parts Quantity already linked to JO.");
+                loJSON.put("message", "All remaining VSP Parts Quantity for "+lsBarcode+" already linked to JO.");
                 return loJSON;
             }else{
                 loJSON.put("result", "error");
@@ -469,11 +501,9 @@ public class JobOrder implements GTransaction{
             }
         }
         
-//        if(fbIsAdd){
-//            poJOParts.getDetailModel(fnJoRow).setQtyEstmt(nVSPQty-nTotalQty);
-//        } else {
+        if(fbIsAdd){
             poJOParts.getDetailModel(fnJoRow).setQtyEstmt(fnInputQty);
-//        }
+        }
           
         return loJSON;
     }
