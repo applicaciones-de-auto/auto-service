@@ -14,7 +14,7 @@ import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.iface.GTranDet;
-import org.guanzon.auto.model.service.Model_JobOrder_Labor;
+import org.guanzon.auto.model.service.Model_Intake_Technician;
 import org.guanzon.auto.validator.service.ValidatorFactory;
 import org.guanzon.auto.validator.service.ValidatorInterface;
 import org.json.simple.JSONObject;
@@ -23,20 +23,20 @@ import org.json.simple.JSONObject;
  *
  * @author Arsiela
  */
-public class JobOrder_Labor implements GTranDet {
-    final String XML = "Model_JobOrder_Labor.xml";
+public class Intake_Technician implements GTranDet {
+    final String XML = "Model_Intake_Technician.xml";
     GRider poGRider;
-//    String psTargetBranchCd = ""; //JO will not required to transfer to branches
+//    String psTargetBranchCd = ""; JO will not required to tra
     boolean pbWtParent;
     
     int pnEditMode;
     String psMessagex;
     public JSONObject poJSON;
     
-    ArrayList<Model_JobOrder_Labor> paDetail;
-    ArrayList<Model_JobOrder_Labor> paRemDetail;
+    ArrayList<Model_Intake_Technician> paDetail;
+    ArrayList<Model_Intake_Technician> paRemDetail;
 
-    public JobOrder_Labor(GRider foAppDrver){
+    public Intake_Technician(GRider foAppDrver){
         poGRider = foAppDrver;
     }
     
@@ -54,7 +54,7 @@ public class JobOrder_Labor implements GTranDet {
     }
 
     @Override
-    public Model_JobOrder_Labor getDetailModel(int fnRow) {
+    public Model_Intake_Technician getDetailModel(int fnRow) {
         return paDetail.get(fnRow);
     }
     
@@ -65,22 +65,20 @@ public class JobOrder_Labor implements GTranDet {
         
         poJSON = new JSONObject();
         if (paDetail.size()<=0){
-            paDetail.add(new Model_JobOrder_Labor(poGRider));
+            paDetail.add(new Model_Intake_Technician(poGRider));
             paDetail.get(0).newRecord();
             
-            paDetail.get(0).setTransNo(fsTransNo);
-            paDetail.get(0).setEntryNo(0);
+            paDetail.get(0).setDiagNo(fsTransNo);
             poJSON.put("result", "success");
-            poJSON.put("message", "JO Labor add record.");
+            poJSON.put("message", "Technician add record.");
         } else {
-            paDetail.add(new Model_JobOrder_Labor(poGRider));
+            paDetail.add(new Model_Intake_Technician(poGRider));
             paDetail.get(paDetail.size()-1).newRecord();
 
-            paDetail.get(paDetail.size()-1).setTransNo(fsTransNo);
-            paDetail.get(paDetail.size()-1).setEntryNo(0);
+            paDetail.get(paDetail.size()-1).setDiagNo(fsTransNo);
             
             poJSON.put("result", "success");
-            poJSON.put("message", "JO Labor add record.");
+            poJSON.put("message", "Technician add record.");
         }
         return poJSON;
     }
@@ -89,10 +87,16 @@ public class JobOrder_Labor implements GTranDet {
         paDetail = new ArrayList<>();
         paRemDetail = new ArrayList<>();
         poJSON = new JSONObject();
-        Model_JobOrder_Labor loEntity = new Model_JobOrder_Labor(poGRider);
-        String lsSQL =  loEntity.makeSelectSQL();
-        lsSQL = MiscUtil.addCondition(lsSQL, " sTransNox = " + SQLUtil.toSQL(fsValue))
-                                                + "  ORDER BY nEntryNox ASC " ;
+        String lsSQL =    "   SELECT "                   
+                        + "    sTransNox "             
+                        + "  , sTechIDxx "             
+                        + "  , sDiagNoxx "             
+                        + "  , sWorkCtgy "             
+                        + "  , sLaborCde "              
+                        + "  , dEntryDte "           
+                        + " FROM intake_technician ";  
+        lsSQL = MiscUtil.addCondition(lsSQL, " sDiagNoxx = " + SQLUtil.toSQL(fsValue));
+                                               // + "  ORDER BY dEntryDte ASC " ;
         System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
         
@@ -100,8 +104,8 @@ public class JobOrder_Labor implements GTranDet {
             int lnctr = 0;
             if (MiscUtil.RecordCount(loRS) > 0) {
                 while(loRS.next()){
-                        paDetail.add(new Model_JobOrder_Labor(poGRider));
-                        paDetail.get(paDetail.size() - 1).openRecord(loRS.getString("sTransNox"), loRS.getString("sLaborCde"));
+                        paDetail.add(new Model_Intake_Technician(poGRider));
+                        paDetail.get(paDetail.size() - 1).openRecord(loRS.getString("sTransNox"));
                         
                         pnEditMode = EditMode.UPDATE;
                         lnctr++;
@@ -165,11 +169,10 @@ public class JobOrder_Labor implements GTranDet {
                 }
             //}
             
-            paDetail.get(lnCtr).setTransNo(fsTransNo);
-            paDetail.get(lnCtr).setEntryNo(lnCtr+1);
-           // paDetail.get(lnCtr).setTargetBranchCd(psTargetBranchCd);
+            paDetail.get(lnCtr).setDiagNo(fsTransNo);
+//            paDetail.get(lnCtr).setTargetBranchCd(psTargetBranchCd);
             
-            ValidatorInterface validator = ValidatorFactory.make(ValidatorFactory.TYPE.JobOrder_Labor, paDetail.get(lnCtr));
+            ValidatorInterface validator = ValidatorFactory.make(ValidatorFactory.TYPE.Intake_Technician, paDetail.get(lnCtr));
             validator.setGRider(poGRider);
             if (!validator.isEntryOkay()){
                 obj.put("result", "error");
@@ -181,7 +184,6 @@ public class JobOrder_Labor implements GTranDet {
         
         return obj;
     }
-    
 //    public void setTargetBranchCd(String fsBranchCd){
 //        psTargetBranchCd = fsBranchCd;
 //    }
@@ -189,8 +191,8 @@ public class JobOrder_Labor implements GTranDet {
     public Object removeDetail(int fnRow){
         JSONObject loJSON = new JSONObject();
         
-        if(paDetail.get(fnRow).getEntryNo() != null){
-            if(paDetail.get(fnRow).getEntryNo() != 0){
+        if(paDetail.get(fnRow).getEntryBy() != null){
+            if(!paDetail.get(fnRow).getEntryBy().trim().isEmpty()){
                 RemoveDetail(fnRow);
             }
         }
@@ -207,26 +209,26 @@ public class JobOrder_Labor implements GTranDet {
         
         poJSON = new JSONObject();
         if (paRemDetail.size()<=0){
-            paRemDetail.add(new Model_JobOrder_Labor(poGRider));
-            paRemDetail.get(0).openRecord(paDetail.get(fnRow).getTransNo(),paDetail.get(fnRow).getLaborCde());
+            paRemDetail.add(new Model_Intake_Technician(poGRider));
+            paRemDetail.get(0).openRecord(paDetail.get(fnRow).getTransNo());
             poJSON.put("result", "success");
             poJSON.put("message", "added to remove record.");
         } else {
-            paRemDetail.add(new Model_JobOrder_Labor(poGRider));
-            paRemDetail.get(paRemDetail.size()-1).openRecord(paDetail.get(fnRow).getTransNo(),paDetail.get(fnRow).getLaborCde());
+            paRemDetail.add(new Model_Intake_Technician(poGRider));
+            paRemDetail.get(paRemDetail.size()-1).openRecord(paDetail.get(fnRow).getTransNo());
             poJSON.put("result", "success");
             poJSON.put("message", "added to remove record.");
         }
         return poJSON;
     }
     
-    public ArrayList<Model_JobOrder_Labor> getDetailList(){
+    public ArrayList<Model_Intake_Technician> getDetailList(){
         if(paDetail == null){
            paDetail = new ArrayList<>();
         }
         return paDetail;
     }
-    public void setDetailList(ArrayList<Model_JobOrder_Labor> foObj){this.paDetail = foObj;}
+    public void setDetailList(ArrayList<Model_Intake_Technician> foObj){this.paDetail = foObj;}
     
     public Object getDetail(int fnRow, int fnIndex){return paDetail.get(fnRow).getValue(fnIndex);}
     public Object getDetail(int fnRow, String fsIndex){return paDetail.get(fnRow).getValue(fsIndex);}
@@ -337,7 +339,7 @@ public class JobOrder_Labor implements GTranDet {
     }
     
     
-    public JSONObject searchLabor(String fsValue) {
+    public JSONObject searchTechnician(String fsValue) {
         poJSON = new JSONObject();
         String lsHeader = "ID»Description";
         String lsColName = "sLaborCde»sLaborDsc"; 
@@ -372,4 +374,5 @@ public class JobOrder_Labor implements GTranDet {
         
         return poJSON;
     }
+    
 }
