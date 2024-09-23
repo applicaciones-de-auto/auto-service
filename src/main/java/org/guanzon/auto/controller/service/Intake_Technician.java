@@ -8,12 +8,15 @@ package org.guanzon.auto.controller.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import org.guanzon.appdriver.agent.ShowDialogFX;
 import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
 import org.guanzon.appdriver.base.SQLUtil;
 import org.guanzon.appdriver.constant.EditMode;
 import org.guanzon.appdriver.iface.GTranDet;
+import org.guanzon.auto.model.clients.Model_Service_Mechanic;
 import org.guanzon.auto.model.service.Model_Intake_Technician;
 import org.guanzon.auto.validator.service.ValidatorFactory;
 import org.guanzon.auto.validator.service.ValidatorInterface;
@@ -87,16 +90,10 @@ public class Intake_Technician implements GTranDet {
         paDetail = new ArrayList<>();
         paRemDetail = new ArrayList<>();
         poJSON = new JSONObject();
-        String lsSQL =    "   SELECT "                   
-                        + "    sTransNox "             
-                        + "  , sTechIDxx "             
-                        + "  , sDiagNoxx "             
-                        + "  , sWorkCtgy "             
-                        + "  , sLaborCde "              
-                        + "  , dEntryDte "           
-                        + " FROM intake_technician ";  
-        lsSQL = MiscUtil.addCondition(lsSQL, " sDiagNoxx = " + SQLUtil.toSQL(fsValue));
-                                               // + "  ORDER BY dEntryDte ASC " ;
+        Model_Intake_Technician loEntity = new Model_Intake_Technician(poGRider);
+        String lsSQL = loEntity.makeSelectSQL();  
+        lsSQL = MiscUtil.addCondition(lsSQL, " sDiagNoxx = " + SQLUtil.toSQL(fsValue))
+                                               + "  ORDER BY sTechIDxx ASC " ;
         System.out.println(lsSQL);
         ResultSet loRS = poGRider.executeQuery(lsSQL);
         
@@ -226,8 +223,20 @@ public class Intake_Technician implements GTranDet {
         if(paDetail == null){
            paDetail = new ArrayList<>();
         }
+        
         return paDetail;
     }
+    
+    public void sortTechnician(){
+        // Sorting using Comparator without lambda
+        Collections.sort(paDetail, new Comparator<Model_Intake_Technician>() {
+            @Override
+            public int compare(Model_Intake_Technician t1, Model_Intake_Technician t2) {
+                return t1.getTechName().compareTo(t2.getTechName());
+            }
+        });
+    }
+    
     public void setDetailList(ArrayList<Model_Intake_Technician> foObj){this.paDetail = foObj;}
     
     public Object getDetail(int fnRow, int fnIndex){return paDetail.get(fnRow).getValue(fnIndex);}
@@ -339,40 +348,35 @@ public class Intake_Technician implements GTranDet {
     }
     
     
-    public JSONObject searchTechnician(String fsValue) {
-        poJSON = new JSONObject();
-        String lsHeader = "ID»Description";
-        String lsColName = "sLaborCde»sLaborDsc"; 
-        String lsCriteria = "sLaborCde»sLaborDsc";
+    public JSONObject searchTechnician() {
+        JSONObject loJSON = new JSONObject();
+        Model_Service_Mechanic loEntity = new Model_Service_Mechanic(poGRider);
+        String lsSQL = loEntity.getSQL();
+        String lsHeader = "ID»Name";
+        String lsColName = "sClientID»sCompnyNm"; 
+        String lsCriteria = "a.sClientID»b.sCompnyNm";
         
-        String lsSQL =   " SELECT "                                             
-                + "   sLaborCde "                                      
-                + " , sLaborDsc "                                      
-                + " , cRecdStat "                                      
-                + " FROM labor " ; 
+        lsSQL = MiscUtil.addCondition(lsSQL,  " a.cRecdStat = '1' ");
+                                            //+ " AND b.sCompnyNm LIKE " + SQLUtil.toSQL(fsValue + "%"));
         
-        lsSQL = MiscUtil.addCondition(lsSQL,  " cRecdStat = '1' "
-                                            + " AND sLaborDsc LIKE " + SQLUtil.toSQL(fsValue + "%"));
-        
-        
-        System.out.println("SEARCH LABOR: " + lsSQL);
-        poJSON = ShowDialogFX.Search(poGRider,
+        System.out.println("SEARCH TECHNICIAN: " + lsSQL);
+        loJSON = ShowDialogFX.Search(poGRider,
                 lsSQL,
-                fsValue,
+                "",
                     lsHeader,
                     lsColName,
                     lsCriteria,
                 1);
 
-        if (poJSON != null) {
+        if (loJSON != null) {
         } else {
-            poJSON = new JSONObject();
-            poJSON.put("result", "error");
-            poJSON.put("message", "No record loaded.");
-            return poJSON;
+            loJSON = new JSONObject();
+            loJSON.put("result", "error");
+            loJSON.put("message", "No record loaded.");
+            return loJSON;
         }
         
-        return poJSON;
+        return loJSON;
     }
     
 }

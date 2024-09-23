@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.guanzon.appdriver.base.GRider;
@@ -285,6 +287,50 @@ public class JobOrder implements GTransaction{
     public ArrayList getJOTechList(){return poIntakeTechnician.getDetailList();}
     public Object addJOTech(){ return poIntakeTechnician.addDetail(poController.getMasterModel().getTransNo());}
     public Object removeJOTech(int fnRow){ return poIntakeTechnician.removeDetail(fnRow);}
+    
+    public JSONObject searchTechnician(){
+        JSONObject loJSON = new JSONObject();
+        //Do not allow searching of technician when there's a technician that has no assigned labor
+        for(int lnCtr = 0; lnCtr <= poIntakeTechnician.getDetailList().size()-1; lnCtr++){
+            if(poIntakeTechnician.getDetailModel(lnCtr).getLaborCde() == null){
+                loJSON.put("result", "error");
+                loJSON.put("message", "Assign Labor for row "+lnCtr+" before adding new technician.\n\nSearch aborted.");
+                return loJSON;
+            } else {
+                if(poIntakeTechnician.getDetailModel(lnCtr).getLaborCde().trim().isEmpty()){
+                    loJSON.put("result", "error");
+                    loJSON.put("message", "Assign Labor for row "+lnCtr+" before adding new technician.\n\nSearch aborted.");
+                    return loJSON;
+                }
+            }
+        }
+        
+        loJSON = poIntakeTechnician.searchTechnician();
+        if(!"error".equals((String) loJSON.get("result"))){
+            for(int lnCtr = 0; lnCtr <= poIntakeTechnician.getDetailList().size()-1; lnCtr++){
+                if(poIntakeTechnician.getDetailModel(lnCtr).getTechID().equals((String) loJSON.get("sClientID"))){
+                    loJSON.put("result", "error");
+                    loJSON.put("message", "Technician already exist.\n\nAdd aborted.");
+                    return loJSON;
+                }
+            }
+            
+            addJOTech();
+            poIntakeTechnician.getDetailModel(poIntakeTechnician.getDetailList().size()-1).setTechName((String) loJSON.get("sCompnyNm"));
+            poIntakeTechnician.getDetailModel(poIntakeTechnician.getDetailList().size()-1).setTechID((String) loJSON.get("sClientID"));
+        }
+        
+        
+//        else {
+//            poIntakeTechnician.getDetailModel(fnRow).setTechName("");
+//            poIntakeTechnician.getDetailModel(fnRow).setTechID("");
+//        }
+        return loJSON;
+    }
+    
+    public void sortTechnician(){
+        poIntakeTechnician.sortTechnician();
+    }
     
     public JSONObject computeAmount(){
         JSONObject loJSON = new JSONObject();
