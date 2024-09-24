@@ -307,13 +307,13 @@ public class JobOrder implements GTransaction{
         
         loJSON = poIntakeTechnician.searchTechnician();
         if(!"error".equals((String) loJSON.get("result"))){
-            for(int lnCtr = 0; lnCtr <= poIntakeTechnician.getDetailList().size()-1; lnCtr++){
-                if(poIntakeTechnician.getDetailModel(lnCtr).getTechID().equals((String) loJSON.get("sClientID"))){
-                    loJSON.put("result", "error");
-                    loJSON.put("message", "Technician already exist.\n\nAdd aborted.");
-                    return loJSON;
-                }
-            }
+//            for(int lnCtr = 0; lnCtr <= poIntakeTechnician.getDetailList().size()-1; lnCtr++){
+//                if(poIntakeTechnician.getDetailModel(lnCtr).getTechID().equals((String) loJSON.get("sClientID"))){
+//                    loJSON.put("result", "error");
+//                    loJSON.put("message", "Technician already exist.\n\nAdd aborted.");
+//                    return loJSON;
+//                }
+//            }
             
             addJOTech();
             poIntakeTechnician.getDetailModel(poIntakeTechnician.getDetailList().size()-1).setTechName((String) loJSON.get("sCompnyNm"));
@@ -330,6 +330,52 @@ public class JobOrder implements GTransaction{
     
     public void sortTechnician(){
         poIntakeTechnician.sortTechnician();
+    }
+    
+    public JSONObject searchVSPLabor(String fsValue,int fnRow){
+        JSONObject loJSON = new JSONObject();
+        loJSON = poVSPLabor.searchVSPLabor(fsValue, poController.getMasterModel().getSourceNo());
+        if(!"error".equals((String) loJSON.get("result"))){
+            //Check when selected labor is existing in JO Labor Details
+            boolean lbExist = false;
+            for(int lnCtr = 0;lnCtr <= poJOLabor.getDetailList().size()-1;lnCtr++){
+                if(poJOLabor.getDetailModel(lnCtr).getLaborCde().equals((String) loJSON.get("sLaborCde"))){
+                    lbExist = true;
+                    break;
+                }
+            }
+            
+            if(!lbExist){
+                poIntakeTechnician.getDetailModel(fnRow).setLaborCde("");
+                poIntakeTechnician.getDetailModel(fnRow).setLaborDsc("");
+                loJSON.put("result", "error");
+                loJSON.put("message", "Selected labor does not exist in JO labor details.\nSelection aborted.");
+                return loJSON;
+            }
+            
+            //Check when labor is already assign to selected technician
+            lbExist = false;
+            for(int lnCtr = 0;lnCtr <= poIntakeTechnician.getDetailList().size()-1;lnCtr++){
+                if(poIntakeTechnician.getDetailModel(lnCtr).getTechID().equals(poIntakeTechnician.getDetailModel(fnRow).getTechID())){
+                    if(poIntakeTechnician.getDetailModel(lnCtr).getLaborCde().equals((String) loJSON.get("sLaborCde"))){
+                        lbExist = true;
+                        break;
+                    }
+                }
+            }
+            
+            if(!lbExist){
+                
+                poIntakeTechnician.getDetailModel(fnRow).setWorkCtgy("2");//Sales job order
+                poIntakeTechnician.getDetailModel(fnRow).setLaborCde((String) loJSON.get("sLaborCde"));
+                poIntakeTechnician.getDetailModel(fnRow).setLaborDsc((String) loJSON.get("sLaborDsc"));
+            } else {
+                loJSON.put("result", "error");
+                loJSON.put("message", "Selected labor already assign to seleted technician.\nSelection aborted.");
+                return loJSON;
+            }
+        }
+        return loJSON;
     }
     
     public JSONObject computeAmount(){
@@ -361,7 +407,24 @@ public class JobOrder implements GTransaction{
         if(poJOLabor.getDetailList().size() - 1 < 0 && poJOParts.getDetailList().size() - 1 < 0){
             loJSON.put("result","error");
             loJSON.put("message", "Job Order Labor and Parts cannot be empty.");
+            return loJSON;
         }
+        
+        for(int lnCtr = 0;lnCtr <= poIntakeTechnician.getDetailList().size()-1;lnCtr++){
+            if(poIntakeTechnician.getDetailModel(lnCtr).getLaborCde() == null){
+                loJSON.put("result","error");
+                loJSON.put("message", "Labor cannot be empty for JO Technician row "+ (lnCtr+1) +".\n\nSaving Aborted.");
+                return loJSON;
+            
+            } else {
+                if(poIntakeTechnician.getDetailModel(lnCtr).getLaborCde().trim().isEmpty()){
+                    loJSON.put("result","error");
+                    loJSON.put("message", "Labor cannot be empty for JO Technician row "+ (lnCtr+1) +".\n\nSaving Aborted.");
+                    return loJSON;
+                }
+            }
+        }
+        
         return loJSON;
     }
     
