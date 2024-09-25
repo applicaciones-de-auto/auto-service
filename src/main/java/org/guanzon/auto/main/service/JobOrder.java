@@ -294,12 +294,12 @@ public class JobOrder implements GTransaction{
         for(int lnCtr = 0; lnCtr <= poIntakeTechnician.getDetailList().size()-1; lnCtr++){
             if(poIntakeTechnician.getDetailModel(lnCtr).getLaborCde() == null){
                 loJSON.put("result", "error");
-                loJSON.put("message", "Assign Labor for row "+lnCtr+" before adding new technician.\n\nSearch aborted.");
+                loJSON.put("message", "Assign Labor for row "+(lnCtr+1)+" before adding new technician.\n\nSearch aborted.");
                 return loJSON;
             } else {
                 if(poIntakeTechnician.getDetailModel(lnCtr).getLaborCde().trim().isEmpty()){
                     loJSON.put("result", "error");
-                    loJSON.put("message", "Assign Labor for row "+lnCtr+" before adding new technician.\n\nSearch aborted.");
+                    loJSON.put("message", "Assign Labor for row "+(lnCtr+1)+" before adding new technician.\n\nSearch aborted.");
                     return loJSON;
                 }
             }
