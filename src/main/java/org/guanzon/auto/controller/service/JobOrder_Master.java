@@ -110,6 +110,7 @@ public class JobOrder_Master implements GTransaction{
 
             poModel.setTransNo(MiscUtil.getNextCode(poModel.getTable(), "sTransNox", true, poGRider.getConnection(), poGRider.getBranchCode()+"JO"));
             poModel.setDSNo(MiscUtil.getNextCode(poModel.getTable(), "sDSNoxxxx", true, poGRider.getConnection(), poGRider.getBranchCode()));
+            poModel.setPrinted("0");
             poModel.newRecord();
             
             if (poModel == null){

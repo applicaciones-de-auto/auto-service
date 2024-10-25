@@ -433,6 +433,18 @@ public class JobOrder implements GTransaction{
         JSONObject loJSONDet = new JSONObject();
         loJSON = poController.searchVSP(fsValue,fbByCode);
         if(!"error".equals((String) loJSON.get("result"))){
+            if((String) loJSON.get("sSerialID") != null){
+                if(((String) loJSON.get("sSerialID")).trim().isEmpty()){
+                    loJSON.put("result", "error");
+                    loJSON.put("message", "Selected VSP does not have vehilcle information yet.\n\nLinking aborted.");
+                    return loJSON;
+                }
+            } else {
+                loJSON.put("result", "error");
+                loJSON.put("message", "Selected VSP does not have vehilcle information yet.\n\nLinking aborted.");
+                return loJSON;
+            }
+            
             poController.getMasterModel().setSourceCD("VSP");
             poController.getMasterModel().setSourceNo((String) loJSON.get("sTransNox"));
             poController.getMasterModel().setVSPNo((String) loJSON.get("sVSPNOxxx"));
