@@ -18,6 +18,7 @@ import org.guanzon.appdriver.constant.TransactionStatus;
 import org.guanzon.appdriver.iface.GTransaction;
 import org.guanzon.auto.general.CancelForm;
 import org.guanzon.auto.general.SearchDialog;
+import org.guanzon.auto.general.TransactionStatusHistory;
 import org.guanzon.auto.model.sales.Model_VehicleSalesProposal_Master;
 import org.guanzon.auto.model.service.Model_JobOrder_Master;
 import org.guanzon.auto.validator.service.ValidatorFactory;
@@ -195,7 +196,39 @@ public class JobOrder_Master implements GTransaction{
             return checkData(poJSON);
         } 
         
+        if(poModel.getTranStat().equals(TransactionStatus.STATE_CLOSED)){
+            poJSON = completeTransaction();
+            if("error".equalsIgnoreCase((String)poJSON.get("result"))){
+                if (!pbWtParent) poGRider.rollbackTrans();
+                return poJSON;
+            }
+        }
+        
         return poJSON;
+    }
+    
+    public JSONObject completeTransaction(){
+        JSONObject loJSON = new JSONObject();
+        TransactionStatusHistory loEntity = new TransactionStatusHistory(poGRider);
+        //Update to cancel all previous open status
+        loJSON = loEntity.cancelTransaction(poModel.getTransNo(), TransactionStatus.STATE_CLOSED);
+        if(!"error".equals((String) loJSON.get("result"))){
+            loJSON = loEntity.newTransaction();
+            if(!"error".equals((String) loJSON.get("result"))){
+                loEntity.getMasterModel().setApproved(poGRider.getUserID());
+                loEntity.getMasterModel().setApprovedDte(poGRider.getServerDate());
+                loEntity.getMasterModel().setSourceNo(poModel.getTransNo());
+                loEntity.getMasterModel().setTableNme(poModel.getTable());
+                loEntity.getMasterModel().setRefrStat(poModel.getTranStat());
+
+                loJSON = loEntity.saveTransaction();
+                if("error".equals((String) loJSON.get("result"))){
+                    return loJSON;
+                }
+            }
+        }
+        
+        return loJSON;
     }
 
     @Override
