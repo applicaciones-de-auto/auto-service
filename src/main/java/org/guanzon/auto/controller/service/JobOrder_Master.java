@@ -215,11 +215,12 @@ public class JobOrder_Master implements GTransaction{
         if(!"error".equals((String) loJSON.get("result"))){
             loJSON = loEntity.newTransaction();
             if(!"error".equals((String) loJSON.get("result"))){
-                loEntity.getMasterModel().setApproved(poGRider.getUserID());
-                loEntity.getMasterModel().setApprovedDte(poGRider.getServerDate());
+//                loEntity.getMasterModel().setApproved(poGRider.getUserID());
+//                loEntity.getMasterModel().setApprovedDte(poGRider.getServerDate());
                 loEntity.getMasterModel().setSourceNo(poModel.getTransNo());
                 loEntity.getMasterModel().setTableNme(poModel.getTable());
                 loEntity.getMasterModel().setRefrStat(poModel.getTranStat());
+                loEntity.getMasterModel().setRemarks("JOB ORDER COMPLETE");
 
                 loJSON = loEntity.saveTransaction();
                 if("error".equals((String) loJSON.get("result"))){
