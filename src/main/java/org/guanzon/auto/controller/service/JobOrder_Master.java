@@ -210,24 +210,29 @@ public class JobOrder_Master implements GTransaction{
     public JSONObject completeTransaction(){
         JSONObject loJSON = new JSONObject();
         TransactionStatusHistory loEntity = new TransactionStatusHistory(poGRider);
-        //Update to cancel all previous open status
-        loJSON = loEntity.cancelTransaction(poModel.getTransNo(), TransactionStatus.STATE_CLOSED);
-        if(!"error".equals((String) loJSON.get("result"))){
-            loJSON = loEntity.newTransaction();
-            if(!"error".equals((String) loJSON.get("result"))){
-//                loEntity.getMasterModel().setApproved(poGRider.getUserID());
-//                loEntity.getMasterModel().setApprovedDte(poGRider.getServerDate());
-                loEntity.getMasterModel().setSourceNo(poModel.getTransNo());
-                loEntity.getMasterModel().setTableNme(poModel.getTable());
-                loEntity.getMasterModel().setRefrStat(poModel.getTranStat());
-                loEntity.getMasterModel().setRemarks("JOB ORDER COMPLETE");
-
-                loJSON = loEntity.saveTransaction();
-                if("error".equals((String) loJSON.get("result"))){
-                    return loJSON;
-                }
-            }
+        loJSON = loEntity.updateStatusHistory(poModel.getTransNo(), poModel.getTable(), "JOB ORDER COMPLETE", TransactionStatus.STATE_CLOSED);
+        if("error".equals((String) loJSON.get("result"))){
+            return loJSON;
         }
+//        TransactionStatusHistory loEntity = new TransactionStatusHistory(poGRider);
+//        //Update to cancel all previous open status
+//        loJSON = loEntity.cancelTransaction(poModel.getTransNo(), TransactionStatus.STATE_CLOSED);
+//        if(!"error".equals((String) loJSON.get("result"))){
+//            loJSON = loEntity.newTransaction();
+//            if(!"error".equals((String) loJSON.get("result"))){
+////                loEntity.getMasterModel().setApproved(poGRider.getUserID());
+////                loEntity.getMasterModel().setApprovedDte(poGRider.getServerDate());
+//                loEntity.getMasterModel().setSourceNo(poModel.getTransNo());
+//                loEntity.getMasterModel().setTableNme(poModel.getTable());
+//                loEntity.getMasterModel().setRefrStat(poModel.getTranStat());
+//                loEntity.getMasterModel().setRemarks("JOB ORDER COMPLETE");
+//
+//                loJSON = loEntity.saveTransaction();
+//                if("error".equals((String) loJSON.get("result"))){
+//                    return loJSON;
+//                }
+//            }
+//        }
         
         return loJSON;
     }
@@ -273,7 +278,8 @@ public class JobOrder_Master implements GTransaction{
                 }
                 
                 CancelForm cancelform = new CancelForm();
-                if (!cancelform.loadCancelWindow(poGRider, poModel.getTransNo(), poModel.getDSNo(), "JO")) {
+//                if (!cancelform.loadCancelWindow(poGRider, poModel.getTransNo(), poModel.getDSNo(), "JO")) {
+                if (!cancelform.loadCancelWindow(poGRider, poModel.getTransNo(), poModel.getTable())) {
                     poJSON.put("result", "error");
                     poJSON.put("message", "Cancellation failed.");
                     return poJSON;
