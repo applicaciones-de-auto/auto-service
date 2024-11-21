@@ -207,6 +207,20 @@ public class JobOrder_Master implements GTransaction{
         return poJSON;
     }
     
+    public JSONObject savePrinted(){
+        JSONObject loJSON = new JSONObject();
+        poModel.setPrinted("1"); //Set to Printed
+        loJSON = saveTransaction();
+        if(!"error".equals((String) loJSON.get("result"))){
+            TransactionStatusHistory loEntity = new TransactionStatusHistory(poGRider);
+            loJSON = loEntity.updateStatusHistory(poModel.getTransNo(), poModel.getTable(), "JO PRINT", "5"); //5 = STATE_PRINTED
+            if("error".equals((String) loJSON.get("result"))){
+                return loJSON;
+            }
+        }
+        return loJSON;
+    }
+    
     public JSONObject completeTransaction(){
         JSONObject loJSON = new JSONObject();
         TransactionStatusHistory loEntity = new TransactionStatusHistory(poGRider);
