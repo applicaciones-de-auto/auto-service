@@ -198,8 +198,8 @@ public class JobOrder implements GTransaction{
         return poJSON;
     }
     
-    public JSONObject savePrint() {
-        return poController.savePrinted();
+    public JSONObject savePrint(boolean fsIsValidate){
+        return poController.savePrinted(fsIsValidate);
     }
     
     private JSONObject checkData(JSONObject joValue){
