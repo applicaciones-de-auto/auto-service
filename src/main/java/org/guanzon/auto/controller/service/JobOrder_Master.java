@@ -224,7 +224,7 @@ public class JobOrder_Master implements GTransaction{
             loJSON = saveTransaction();
             if(!"error".equals((String) loJSON.get("result"))){
                 TransactionStatusHistory loEntity = new TransactionStatusHistory(poGRider);
-                loJSON = loEntity.updateStatusHistory(poModel.getTransNo(), poModel.getTable(), "JO PRINT", "5"); //5 = STATE_PRINTED
+                loJSON = loEntity.updateStatusHistory(poModel.getTransNo(), poModel.getTable(), "JO", "5", "PRINT"); //5 = STATE_PRINTED
                 if("error".equals((String) loJSON.get("result"))){
                     return loJSON;
                 }
@@ -236,7 +236,7 @@ public class JobOrder_Master implements GTransaction{
     public JSONObject completeTransaction(){
         JSONObject loJSON = new JSONObject();
         TransactionStatusHistory loEntity = new TransactionStatusHistory(poGRider);
-        loJSON = loEntity.updateStatusHistory(poModel.getTransNo(), poModel.getTable(), "JOB ORDER COMPLETE", TransactionStatus.STATE_CLOSED);
+        loJSON = loEntity.updateStatusHistory(poModel.getTransNo(), poModel.getTable(), "JO", TransactionStatus.STATE_CLOSED, "COMPLETE");
         if("error".equals((String) loJSON.get("result"))){
             return loJSON;
         }
