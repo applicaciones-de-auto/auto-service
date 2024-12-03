@@ -198,6 +198,10 @@ public class JobOrder implements GTransaction{
         return poJSON;
     }
     
+    public JSONObject savePrint(boolean fsIsValidate){
+        return poController.savePrinted(fsIsValidate);
+    }
+    
     private JSONObject checkData(JSONObject joValue){
         if(pnEditMode == EditMode.ADDNEW ||pnEditMode == EditMode.READY || pnEditMode == EditMode.UPDATE){
             if(joValue.containsKey("continue")){

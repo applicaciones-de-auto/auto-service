@@ -9,6 +9,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.guanzon.appdriver.base.GRider;
 import org.guanzon.appdriver.base.MiscUtil;
+import org.guanzon.appdriver.base.SQLUtil;
+import org.guanzon.appdriver.constant.TransactionStatus;
 
 /**
  *
@@ -68,10 +70,12 @@ public class JobOrderMaster {
                         + " , a.sModified "                                                                  
                         + " , a.dModified "                                                     
                         + "  , CASE "          
-                        + " 	WHEN a.cTranStat = '2' THEN 'APPROVE' "                     
-                        + " 	WHEN a.cTranStat = '3' THEN 'CANCELLED' "                                       
-                        + " 	ELSE 'OPEN'  "                                                          
-                        + "    END AS sTranStat "                                                                  
+                        + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_CLOSED)+" THEN 'COMPLETED' "                     
+                        + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)+" THEN 'CANCELLED' "                  
+                        + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_OPEN)+" THEN 'ACTIVE' "                    
+                        + " 	WHEN a.cTranStat = "+SQLUtil.toSQL(TransactionStatus.STATE_POSTED)+" THEN 'POSTED' "                                      
+                        + " 	ELSE 'ACTIVE'  "                                                          
+                        + "    END AS sTranStat "                                                                 
                         + " , b.sCompnyNm AS sOwnrNmxx "                                                     
                         + " , b.cClientTp "                                                                  
                         + " , IFNULL(CONCAT( IFNULL(CONCAT(d.sHouseNox,' ') , ''), "                         
@@ -90,7 +94,9 @@ public class JobOrderMaster {
                         + " , l.sBranchCD "                                                                  
                         + " , n.sBranchNm "                                                                  
                         + " , m.sCompnyNm AS sCoBuyrNm "                                                     
-                        + " , o.sCompnyNm AS sEmployNm "                                                     
+                        + " , o.sCompnyNm AS sEmployNm "                                                                     
+                        + " , DATE(p.dModified) AS dComplete "                                                                           
+                        + " , q.sCompnyNm AS sComplete "                                                    
                         + " FROM diagnostic_master a "                                                       
                         + " LEFT JOIN client_master b ON b.sClientID = a.sClientID "                         
                         + " LEFT JOIN client_address c ON c.sClientID = a.sClientID AND c.cPrimaryx = '1' "  
@@ -105,7 +111,9 @@ public class JobOrderMaster {
                         + " LEFT JOIN vsp_master l ON l.sTransNox = a.sSourceNo "                            
                         + " LEFT JOIN client_master m ON m.sClientID = l.sCoCltIDx " /*co-buyer*/            
                         + " LEFT JOIN branch n ON n.sBranchCd = l.sBranchCD "                                
-                        + " LEFT JOIN ggc_isysdbf.client_master o ON o.sClientID = a.sEmployID "
+                        + " LEFT JOIN ggc_isysdbf.client_master o ON o.sClientID = a.sEmployID "   
+                        + " LEFT JOIN transaction_status_history p ON p.sSourceNo = a.sTransNox AND p.cRefrStat = "+ SQLUtil.toSQL(TransactionStatus.STATE_CLOSED) + " AND p.cTranStat <> "+ SQLUtil.toSQL(TransactionStatus.STATE_CANCELLED)
+                        + " LEFT JOIN ggc_isysdbf.client_master q ON q.sClientID = p.sModified " 
                         + " WHERE 0=1";
         
         
