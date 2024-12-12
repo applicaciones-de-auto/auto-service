@@ -336,9 +336,9 @@ public class JobOrder implements GTransaction{
         poIntakeTechnician.sortTechnician();
     }
     
-    public JSONObject searchVSPLabor(String fsValue,int fnRow){
+    public JSONObject searchVSPLabor(String fsValue,int fnRow, boolean fbByCode){
         JSONObject loJSON = new JSONObject();
-        loJSON = poVSPLabor.searchVSPLabor(fsValue, poController.getMasterModel().getSourceNo());
+        loJSON = poVSPLabor.searchVSPLabor(fsValue, poController.getMasterModel().getSourceNo(), fbByCode);
         if(!"error".equals((String) loJSON.get("result"))){
             //Check when selected labor is existing in JO Labor Details
             boolean lbExist = false;
